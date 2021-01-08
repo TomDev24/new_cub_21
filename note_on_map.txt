@@ -1,0 +1,8 @@
+//only 4 chars allowed for map 0,1, 2, (n, s, e, w)
+//map must be closed, walls on edges
+//info elements can be separated by \n, but not the map!!!
+//map must go last
+//spaces are valid part of the map
+!!!confusing part
+//info for elements ingnores spaces (information from an element can be separatedby one or more space(s))
+!!!
