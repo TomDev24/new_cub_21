@@ -113,8 +113,8 @@ int count_spaces(char *line)
 void print_map_info(t_map *map)
 {
     // resolution
-    printf("X val of res %d\n", map->resolution.x);
-    printf("Y val of res %d\n", map->resolution.y);
+    printf("X val of res %f\n", map->resolution.x);
+    printf("Y val of res %f\n", map->resolution.y);
 
     //colors for floor and ceilling
     printf("Floor color %x \n", map->floor_c);
