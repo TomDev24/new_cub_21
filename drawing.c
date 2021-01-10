@@ -26,10 +26,10 @@ void    normalize(t_vector *vec)
 {
     float len;
 
-    printf("\n ---GO inVector x: %f, y: %f", vec->x, vec->y);
+    //printf("\n ---GO inVector x: %f, y: %f", vec->x, vec->y);
     len = vec->x * vec->x + vec->y *vec->y;
     len = sqrt(len);
-    printf(">>%f<<", len);
+    //printf(">>%f<<", len);
     vec->x = vec->x / len;
     vec->y = vec->y / len;
     /*
@@ -105,6 +105,33 @@ void fill_black(void *mlx, void *win, t_img *img)
     mlx_put_image_to_window(mlx, win, img->img, 0, 0);
 }
 
+void draw_map(void *mlx, void *win, t_map *map)
+{
+    int x = 0;
+    int y = 0;
+
+    void *img;
+    t_img img_info;
+    char *addr;
+    char *start_addr;
+
+    img = mlx_new_image(mlx, map->width * 20, map->height * 20);
+    start_addr = mlx_get_data_addr(img, &img_info.bits_per_pixel, &img_info.line_length, &img_info.endian);
+
+    while(y < map->height * 20)
+    {
+        while (x < map->width * 20)
+        {
+            addr = start_addr + (y * img_info.line_length + x * (img_info.bits_per_pixel / 8));
+            *(unsigned int*)addr = 0xFFFFFF;
+            x++;
+        }
+        x = 0;
+        y++;
+    }
+    mlx_put_image_to_window(mlx, win, img, 0, 0);
+}
+
 void draw_line(void *mlx, void *win, t_vector vec1, t_vector vec2, t_img *img)
 {
     t_vector dir;
@@ -120,7 +147,7 @@ void draw_line(void *mlx, void *win, t_vector vec1, t_vector vec2, t_img *img)
 
     dir = sub_vector(vec2, vec1);
     normalize(&dir);
-    printf("\ndir x:%f y:%f\n",dir.x, dir.y);
+    //printf("\ndir x:%f y:%f\n",dir.x, dir.y);
 
     //we dedacating to much memory to draw the line,
     //it could be not 600 600, but sides of rectangle of the line

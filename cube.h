@@ -15,6 +15,7 @@ typedef struct player
     t_vector pos;
     t_vector size;
     int      speed;
+    float      angle;
 }               t_player;
 
 
@@ -29,7 +30,8 @@ typedef struct map
     unsigned int floor_c;
     unsigned int ceilling_c;
     char*        map;
-    size_t         line_length;
+    int         width;
+    int         height;
 }              t_map;
 
 typedef struct img
@@ -47,6 +49,7 @@ char **gen_map(int rows, int cols);
 
 void print_map(int map[M_WIDTH][M_HEIGTH]);
 void print_map2(char **map);
+void draw_map(void *mlx, void *win, t_map *map);
 
 int parse_map(char *file, t_map *map_info);
 void fill_black(void *mlx, void *win, t_img *img);

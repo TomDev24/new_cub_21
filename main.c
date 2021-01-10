@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <math.h>
 #include <mlx.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -27,10 +28,23 @@ typedef struct all
     t_img     *surface;
 }           t_all;
 
+t_vector endray_point(t_player *player)
+{
+    t_vector endpoint;
+    int ray_length = 600;
+
+    endpoint.x = ray_length * cos(player->angle);
+    endpoint.y = ray_length * sin(player->angle);
+
+    //printf("\nEnd point x:%f and y: %f\n", endpoint.x, endpoint.y);
+    return endpoint;
+}
+
 int rend(t_all *game_params)
 {
     fill_black(game_params->mlx_info->mlx, game_params->mlx_info->win, game_params->surface);
     draw_rect(game_params->mlx_info->mlx, game_params->mlx_info->win, game_params->player->pos, add_vector(game_params->player->pos, game_params->player->size), game_params->surface);
+    draw_line(game_params->mlx_info->mlx, game_params->mlx_info->win, game_params->player->pos, endray_point(game_params->player), game_params->surface);
     return (1);
 }
 
@@ -65,21 +79,21 @@ int main(int argc, char **argv)
     player.pos.x = 300; player.pos.y = 300;
     player.size.x = 30;
     player.size.y = 30;
+    player.angle = 1;
     player.speed = 3;
     //player
     draw_rect(mlx_info.mlx, mlx_info.win, player.pos, add_vector(player.pos, player.size), &surface);
-    //draw_rect(mlx, win, v1, v2, &surface);
+    draw_map(mlx_info.mlx, mlx_info.win, &map_info);
 
     game_params.player = &player;
     game_params.surface = &surface;
     game_params.mlx_info = &mlx_info;
-    /*
-    if (&game_params == (t_all*)&player)
-        v1.x = v1.x; */
 
-    //mlx_key_hook(win, key_hook, NULL);
+    game_params.player->pos.x++;
+
+    mlx_key_hook(mlx_info.win, key_hook, NULL);
     mlx_hook(mlx_info.win, 2, 1L<<0, movement, &player); //2 is key pressed event,
-    mlx_loop_hook(mlx_info.mlx, rend, &game_params);
+    //mlx_loop_hook(mlx_info.mlx, rend, &game_params);
     mlx_loop(mlx_info.mlx);
     return (0);
 }

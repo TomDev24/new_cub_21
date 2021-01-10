@@ -125,6 +125,9 @@ void print_map_info(t_map *map)
 
     //map in form of string
     printf("MAP:\n%s \n", map->map);
+
+    //map width and height
+    printf("Map WIDTH: %d  HEIGHT %d\n", map->width, map->height);
 }
 
 int		create_trgb(int t, int r, int g, int b)
@@ -134,6 +137,7 @@ int		create_trgb(int t, int r, int g, int b)
 
 void init_map_struct(t_map *map)
 {
+    map->height = 0;
     map->map = "";
 }
 
@@ -144,19 +148,23 @@ void fill_struct(char *line, t_map *map_info, int *flag)
     int g = 0;
     int b = 0;
     int offset;
-    size_t line_length;
+    size_t line_length = 0;
 
-    line_length = 0;
     value++;
     if (ft_strlen(line) <= 0)
         return ;
     //its not absolutelry correct check
     if (*flag == 4)
     {
+        //if (ft_strrchr(line, '0') !=NULL || ft_strrchr(line, '1') != NULL)
+        //{
+        printf("Here\n");
+        map_info->height++;
+        //}
         if (ft_strlen(line) > line_length)
         {
             line_length = ft_strlen(line);
-            map_info->line_length = line_length;
+            map_info->width = line_length;
         }
         map_info->map = ft_strjoin(map_info->map, line);
         map_info->map = ft_strjoin(map_info->map, "\n");

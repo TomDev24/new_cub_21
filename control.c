@@ -28,5 +28,9 @@ int     movement(int keycode, t_player *player)
         player->pos.y -= player->speed;
     if (keycode == 115)
         player->pos.y += player->speed;
+    if (keycode == 65361) //left
+        player->angle -= 0.01;
+    if (keycode == 65363) // right
+        player->angle += 0.01;
     return (0);
 }
