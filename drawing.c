@@ -120,12 +120,31 @@ void draw_map(void *mlx, void *win, t_map *map)
 
     while(y < map->height * 20)
     {
+        //we could go beyond actual length of line, so we need second check
         while (x < map->width * 20)
         {
             addr = start_addr + (y * img_info.line_length + x * (img_info.bits_per_pixel / 8));
             *(unsigned int*)addr = 0xFFFFFF;
+            //we could go beyond actual length of line, so we need second check
+            if (map->full_map[y / 20][x / 20] == '1' && map->full_map[y / 20][x / 20] != '\0')
+            {
+                *(unsigned int*)addr = 0xFF0000;
+                //printf("1");
+            }
+            else if (map->full_map[y / 20][x / 20] == 'N')
+            {
+                *(unsigned int*)addr = 0x001000;
+                //printf("0");
+            }
+            else
+            {
+                //printf("0");
+                addr++;
+            }
+            
             x++;
         }
+        printf("\n");
         x = 0;
         y++;
     }
@@ -164,14 +183,16 @@ void draw_line(void *mlx, void *win, t_vector vec1, t_vector vec2, t_img *img)
         vec1.x = x;
         vec1.y = y;
     }
-    while (x <= vec2.x && y <= vec2.y)
+    while (x <= vec2.x)
     {
-        if (dir.x == 0)
-            y = vec1.y;
-        else
-            y = vec1.y + dir.y * (x - vec1.x)/dir.x;
+        y = (int)floor(vec1.y + dir.y * (x - vec1.x)/dir.x);
         //printf("Y %d\n",y);
-        addr = img->addr + (y * img->line_length + x * (img->bits_per_pixel / 8));
+        if (y < 0)
+            y = -y;
+        if (y == 0)
+            y = 1;
+        //printf("Y %d\n",y);
+        addr = img->addr + (int)floor((y * img->line_length + x * (img->bits_per_pixel / 8)));
         *(unsigned int*)addr = color;
         x++;
     }

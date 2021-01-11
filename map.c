@@ -224,6 +224,8 @@ int parse_map(char *file, t_map *map_info)
         //printf("\n Line: %s", line);
         //printf("  Flag %d", is_full);
     }
+    map_info->full_map = ft_split(map_info->map, '\n');
     print_map_info(map_info);
+    //printf("First line %s\n", map_info->full_map[4]);
     return (0);
 }

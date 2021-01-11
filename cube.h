@@ -30,6 +30,7 @@ typedef struct map
     unsigned int floor_c;
     unsigned int ceilling_c;
     char*        map;
+    char**       full_map;
     int         width;
     int         height;
 }              t_map;
