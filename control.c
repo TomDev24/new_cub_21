@@ -1,18 +1,8 @@
-#include <stdio.h>
-#include <math.h>
-#include <mlx.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include "cube.h"
-#include "./libft/libft.h"
 
 int     key_hook(int keycode, void *nall)
 {
-    keycode++;
-    keycode--;
-    nall++;
-    nall--;
-    printf("Key press %d\n", keycode);
+    printf("Key press %d\n, just ignore this %p", keycode, nall);
     return (0);
 }
 

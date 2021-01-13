@@ -1,8 +1,4 @@
-#include <stdio.h>
-#include <math.h>
-#include <mlx.h>
 #include "cube.h"
-
 
 t_vector add_vector(t_vector vec1, t_vector vec2)
 {
@@ -129,16 +125,16 @@ void draw_map(void *mlx, void *win, t_map *map)
             if (map->full_map[y / 20][x / 20] == '1' && map->full_map[y / 20][x / 20] != '\0')
             {
                 *(unsigned int*)addr = 0xFF0000;
-                //printf("1");
+                printf("1");
             }
             else if (map->full_map[y / 20][x / 20] == 'N')
             {
                 *(unsigned int*)addr = 0x001000;
-                //printf("0");
+                printf("0");
             }
             else
             {
-                //printf("0");
+                printf("0");
                 addr++;
             }
             
@@ -196,30 +192,128 @@ void draw_line(void *mlx, void *win, t_vector vec1, t_vector vec2, t_img *img)
         *(unsigned int*)addr = color;
         x++;
     }
-    /*
-    while (y < 600)
+
+
+    mlx_put_image_to_window(mlx, win, img->img, 0, 0);
+}
+
+void draw_line2(void *mlx, void *win, t_vector vec1, t_vector vec2, t_img *img)
+{
+    //Bresenham’s Line Drawing Algorithm
+    //https://www.thecrazyprogrammer.com/2017/01/bresenhams-line-drawing-algorithm-c-c.html
+    // y = mx + c -- line function
+    //slope m is equals dy/dx
+ //   |          |
+ //   | d upper  .
+ //   |    .     |
+ //   ,          |
+ //   | d lower  |
+
+    int dx, dy, p, x, y;
+    //t_vector dir;
+    char *addr;
+    unsigned int color;
+
+    //vec2.x = abs((int)vec2.x);
+    //vec2.y = abs((int)vec2.y);
+    color = mlx_get_color_value(mlx, 0xABCDEF);
+    if (vec1.x <= vec2.x)
     {
-        while (x < 600)
+        x = vec1.x;
+        y = vec1.y;
+    }
+    else
+    {
+        x = vec2.x;
+        y = vec2.y;
+        vec2.x = vec1.x;
+        vec2.y = vec1.y;
+        vec1.x = x;
+        vec1.y = y;
+    }
+
+    dx = vec2.x - x;
+    dy = vec2.y - y;
+
+    p = 2 * (dy - dx);
+    while (x <= vec2.x)
+    {
+        if (p>= 0)
         {
-            //printf("\n Vector x: %d, y: %d", line_segment.x, line_segment.y);
-            //printf("Vector of line seg x: %d, y: %d\n", line_segment.x, line_segment.y);
-            //printf("Loop x: %d, y: %d\n", x, y);
-            if ( (line_segment.x == x && line_segment.y == y) )
-            {
-                addr = img.addr + (y * img.line_length + x * (img.bits_per_pixel / 8));
-                *(unsigned int*)addr = color;
-                line_segment = add_vector(line_segment, dir);
-                printf("Vector of line seg x: %f, y: %f\n", line_segment.x, line_segment.y);
-            }
-            if (line_segment.x == vec2.x && line_segment.y == vec2.y)
-            {
-                break;
-            }
-            x++;
+            addr = img->addr + ((y * img->line_length + x * (img->bits_per_pixel / 8)));
+            *(unsigned int*)addr = color;
+            y++;
+            p = p + 2*dy - 2*dx;
         }
-        x = 0;
-        y++;
-    }*/
+        else
+        {
+           addr = img->addr + ((y * img->line_length + x * (img->bits_per_pixel / 8)));
+           *(unsigned int*)addr = color;
+           p = p + 2*dy;
+        }
+        printf("Y is %d\n", y);
+        x++;
+    }
+    mlx_put_image_to_window(mlx, win, img->img, 0, 0);
+}
+
+void draw_line3(void *mlx, void *win, t_vector vec1, t_vector vec2, t_img *img)
+{
+    float x;
+    float y;
+
+    int dx;
+    int dy;
+    int step;
+    //float slope;
+
+    char *addr;
+    unsigned int color;
+
+    color = mlx_get_color_value(mlx, 0xABCDEF);
+    if (vec1.x <= vec2.x)
+    {
+        x = vec1.x;
+        y = vec1.y;
+    }
+    else
+    {
+        x = vec2.x;
+        y = vec2.y;
+        vec2.x = vec1.x;
+        vec2.y = vec1.y;
+        vec1.x = x;
+        vec1.y = y;
+    }
+
+    //dx and dy could be zero
+    dx = vec2.x - vec1.x;
+    dy = vec2.y - vec1.y;
+    if (abs(dx) > abs(dy))
+        step = abs(dx);
+    else
+        step = abs(dy);
+    //slope = dy / dx; // casting to float
+    x = dx / (float)step;
+    y = dy / (float)step;
+    if (x > 1)
+        x = 1;
+    if (y > 1)
+        y = 1;
+    //printf("X is %f, y is %f\n", x, y);
+    while (step--)
+    {
+        addr = img->addr + (((int)round(vec1.y) * img->line_length + (int)round(vec1.x) * (img->bits_per_pixel / 8)));
+        *(unsigned int*)addr = color;
+        
+        vec1.y += y;
+        vec1.x += x;
+        //printf("X is %f, y is %f\n", vec1.x, vec1.y);
+    }
+    
+    //if (dy == 0)
+        //slope = 0;
+    
 
     mlx_put_image_to_window(mlx, win, img->img, 0, 0);
 }

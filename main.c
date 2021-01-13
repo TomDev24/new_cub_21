@@ -1,49 +1,14 @@
-#include <stdio.h>
-#include <math.h>
-#include <mlx.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include "cube.h"
-#include "./libft/libft.h"
-#include "./gnl/get_next_line.h"
-
-
-typedef struct musor
-{
-    void *mlx;
-    void *win;
-}          t_musor;
-
-
-typedef struct mlx
-{
-    void    *win;
-    void    *mlx;
-}       t_mlx;
-
-typedef struct all
-{
-    t_mlx   *mlx_info;
-    t_player *player;
-    t_img     *surface;
-    t_map     *map_info;
-}           t_all;
 
 t_vector endray_point(t_player *player)
 {
     t_vector endpoint;
     int ray_length = 100;
 
-    endpoint.x = player->pos.x + ray_length * cosf(player->angle);
-    endpoint.y = player->pos.y + ray_length * sinf(player->angle);
+    endpoint.x = (player->pos.x + ray_length * cosf(player->angle));
+    endpoint.y = (player->pos.y + ray_length * sinf(player->angle));
 
-    /*
-    printf("sin %f\n", sinf(player->angle));
-    printf("cos %f\n", cosf(player->angle));
-    printf("x end %f\n", endpoint.x);
-    printf("y end %f\n", endpoint.y );
-    */
-    //printf("\nEnd point x:%f and y: %f\n", endpoint.x, endpoint.y);
+    //printf("End point x:%f and y: %f\n", endpoint.x, endpoint.y);
     return endpoint;
 }
 
@@ -62,9 +27,11 @@ int rend(t_all *game_params)
     
 
     //draw_map(game_params->mlx_info->mlx, game_params->mlx_info->win, game_params->map_info);
-    draw_rect(game_params->mlx_info->mlx, game_params->mlx_info->win, game_params->player->pos, add_vector(game_params->player->pos, game_params->player->size), game_params->surface);
-    draw_line(game_params->mlx_info->mlx, game_params->mlx_info->win, game_params->player->pos, endray_point(game_params->player), game_params->surface);
 
+    raycast(game_params, game_params->player);
+    //raycast2(game_params, game_params->player);
+    //draw_rect(game_params->mlx_info->mlx, game_params->mlx_info->win, game_params->player->pos, add_vector(game_params->player->pos, game_params->player->size), game_params->surface);
+    //draw_line3(game_params->mlx_info->mlx, game_params->mlx_info->win, game_params->player->pos, endray_point(game_params->player), game_params->surface);
     //clear window is much faster and doesnt work
     //mlx_clear_window(game_params->mlx_info->mlx, game_params->mlx_info->win);
     return (1);
@@ -77,11 +44,10 @@ int main(int argc, char **argv)
     t_img surface;
     t_map map_info;
     t_mlx mlx_info;
-    int map[M_WIDTH][M_HEIGTH];
     t_vector v1;
     t_vector v2;
-    v1.x = 20; v1.y = 20;
-    v2.x = 200; v2.y = 400;
+    v1.x =300; v1.y = 300;
+    v2.x = 500; v2.y = 400;
     
     if (argc > 1)
     {
@@ -89,7 +55,6 @@ int main(int argc, char **argv)
         if (parse_map(argv[1], &map_info) == -1)
             return(-1);
     }
-    fill_map(map);
     mlx_info.mlx = mlx_init();
     mlx_info.win = mlx_new_window(mlx_info.mlx, 600, 600, "Yes");
     
@@ -97,10 +62,10 @@ int main(int argc, char **argv)
     //map_info.map = gen_map(3, 3); now wont work
     //print_map2(map_info.map);
 
-    draw_line(mlx_info.mlx, mlx_info.win, v1, v2, &surface);
+    draw_line3(mlx_info.mlx, mlx_info.win, v1, v2, &surface);
     player.pos.x = 300; player.pos.y = 300;
-    player.size.x = 30;
-    player.size.y = 30;
+    player.size.x = 10;
+    player.size.y = 10;
     player.angle = 0;
     player.speed = 3;
     //player
