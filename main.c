@@ -23,13 +23,14 @@ int rend(t_all *game_params)
     */
 
     // cpu drops from 14 to 2, when i dont use fill black
-    fill_black(game_params->mlx_info->mlx, game_params->mlx_info->win, game_params->surface);
+    fill_black(game_params->mlx_info->mlx, game_params->mlx_info->win, game_params->surface, game_params->map_info);
     
 
     //draw_map(game_params->mlx_info->mlx, game_params->mlx_info->win, game_params->map_info);
 
     raycast(game_params, game_params->player);
-    //raycast2(game_params, game_params->player);
+    if (game_params->mini_ray)
+        raycast2(game_params, game_params->player);
     //draw_rect(game_params->mlx_info->mlx, game_params->mlx_info->win, game_params->player->pos, add_vector(game_params->player->pos, game_params->player->size), game_params->surface);
     //draw_line3(game_params->mlx_info->mlx, game_params->mlx_info->win, game_params->player->pos, endray_point(game_params->player), game_params->surface);
     //clear window is much faster and doesnt work
@@ -54,11 +55,13 @@ int main(int argc, char **argv)
         //open_print(argv[1]);
         if (parse_map(argv[1], &map_info) == -1)
             return(-1);
+        if(argv[2])
+            game_params.mini_ray = argv[2];
     }
     mlx_info.mlx = mlx_init();
-    mlx_info.win = mlx_new_window(mlx_info.mlx, 600, 600, "Yes");
+    mlx_info.win = mlx_new_window(mlx_info.mlx, map_info.resolution.x, map_info.resolution.y, "Yes");
     
-    surface = create_surface(mlx_info.mlx, 600, 600);
+    surface = create_surface(mlx_info.mlx, map_info.resolution.x, map_info.resolution.y);
     //map_info.map = gen_map(3, 3); now wont work
     //print_map2(map_info.map);
 

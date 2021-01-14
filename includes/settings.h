@@ -1,6 +1,16 @@
 #ifndef SETTINGS_H
 # define SETTINGS_H
 
+#ifndef WIDTH
+    # define WIDTH 700
+#endif
+
+#ifndef HEIGHT
+    # define HEIGHT 700
+#endif
+
+#define TILE (WIDTH / 10)
+
 typedef struct map
 {
     t_vector resolution;
@@ -15,6 +25,7 @@ typedef struct map
     char**       full_map;
     int         width;
     int         height;
+    int         tile;
 }              t_map;
 
 typedef struct player
@@ -31,7 +42,7 @@ typedef struct ray_info
     float       FOV;
     float       FOV_half;
     float       max_depth;
-    int         rays_amount;
+    //int         rays_amount;
     float       dist;
     float       proj_coef;
 }           t_ray_info;
@@ -57,6 +68,7 @@ typedef struct all
     t_player *player;
     t_img     *surface;
     t_map     *map_info;
+    char *    mini_ray;
 }           t_all;
 
 #endif

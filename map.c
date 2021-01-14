@@ -49,6 +49,9 @@ void print_map_info(t_map *map)
 
     //map width and height
     printf("Map WIDTH: %d  HEIGHT %d\n", map->width, map->height);
+
+    //map tile
+    printf("Map tile %d\n", map->tile);
 }
 
 int		create_trgb(int t, int r, int g, int b)
@@ -79,7 +82,6 @@ void fill_struct(char *line, t_map *map_info, int *flag)
     {
         //if (ft_strrchr(line, '0') !=NULL || ft_strrchr(line, '1') != NULL)
         //{
-        printf("Here\n");
         map_info->height++;
         //}
         if (ft_strlen(line) > line_length)
@@ -146,6 +148,10 @@ int parse_map(char *file, t_map *map_info)
         //printf("  Flag %d", is_full);
     }
     map_info->full_map = ft_split(map_info->map, '\n');
+
+    //tile can be get from HEIGTH too, we need to decide 
+    //YOU SHOULD TAKE HEIGTH OF COURSE
+    map_info->tile = map_info->resolution.y / map_info->height;
     print_map_info(map_info);
     //printf("First line %s\n", map_info->full_map[4]);
     return (0);

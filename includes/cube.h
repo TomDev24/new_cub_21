@@ -16,7 +16,7 @@
 void draw_map(void *mlx, void *win, t_map *map);
 
 int parse_map(char *file, t_map *map_info);
-void fill_black(void *mlx, void *win, t_img *img);
+void fill_black(void *mlx, void *win, t_img *img, t_map *map);
 //debug
 void    raycast2(t_all *game, t_player *player);
 void open_print(char *name);

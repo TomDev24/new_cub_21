@@ -79,7 +79,7 @@ void draw_rect(void *mlx, void *win, t_vector vec1, t_vector vec2, t_img *img)
     mlx_put_image_to_window(mlx, win, img->img, 0, 0);
 }
 
-void fill_black(void *mlx, void *win, t_img *img)
+void fill_black(void *mlx, void *win, t_img *img, t_map *map)
 {
     int x = 0;
     int y = 0;
@@ -87,9 +87,9 @@ void fill_black(void *mlx, void *win, t_img *img)
     unsigned int color;
 
     color = mlx_get_color_value(mlx, 0x000000);
-    while (y < 600)
+    while (y < map->resolution.y)
     {
-        while (x < 600)
+        while (x < map->resolution.x)
         {
                 addr = img->addr + (y * img->line_length + x * (img->bits_per_pixel / 8));
                 *(unsigned int*)addr = color;
@@ -105,29 +105,30 @@ void draw_map(void *mlx, void *win, t_map *map)
 {
     int x = 0;
     int y = 0;
+    int scaler = 20;
 
     void *img;
     t_img img_info;
     char *addr;
     char *start_addr;
 
-    img = mlx_new_image(mlx, map->width * 20, map->height * 20);
+    img = mlx_new_image(mlx, map->width * scaler, map->height * scaler);
     start_addr = mlx_get_data_addr(img, &img_info.bits_per_pixel, &img_info.line_length, &img_info.endian);
 
-    while(y < map->height * 20)
+    while(y < map->height * scaler)
     {
         //we could go beyond actual length of line, so we need second check
-        while (x < map->width * 20)
+        while (x < map->width * scaler)
         {
             addr = start_addr + (y * img_info.line_length + x * (img_info.bits_per_pixel / 8));
             *(unsigned int*)addr = 0xFFFFFF;
             //we could go beyond actual length of line, so we need second check
-            if (map->full_map[y / 20][x / 20] == '1' && map->full_map[y / 20][x / 20] != '\0')
+            if (map->full_map[y / scaler][x / scaler] == '1' && map->full_map[y / scaler][x / scaler] != '\0')
             {
                 *(unsigned int*)addr = 0xFF0000;
                 printf("1");
             }
-            else if (map->full_map[y / 20][x / 20] == 'N')
+            else if (map->full_map[y / scaler][x / scaler] == 'N')
             {
                 *(unsigned int*)addr = 0x001000;
                 printf("0");

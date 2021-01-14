@@ -1,15 +1,15 @@
 #include "cube.h"
 
-void    init_ray_struct(t_ray_info *ray_info)
+void    init_ray_struct(t_ray_info *ray_info, t_all *game)
 {
-    ray_info->FOV = 1.1;
+    ray_info->FOV = 1;
     ray_info->FOV_half= ray_info->FOV/2;
-    ray_info->dt_a = ray_info->FOV / (float)600;
+    ray_info->dt_a = ray_info->FOV / game->map_info->resolution.x;
     //printf("delta angle %f\n", ray_info->dt_a);
-    ray_info->max_depth = 800;
-    ray_info->rays_amount = 600;
-    ray_info->dist = 600 / (2 * tan(ray_info->FOV_half));
-    ray_info->proj_coef = 2 * ray_info->dist * 60;
+    ray_info->max_depth = game->map_info->resolution.x * 2;
+    //ray_info->rays_amount = 600;
+    ray_info->dist = game->map_info->resolution.x / (2 * tan(ray_info->FOV_half));
+    ray_info->proj_coef = 2 * ray_info->dist * 80;
 }
 
 /*
@@ -37,6 +37,7 @@ void    raycast(t_all *game, t_player *player)
     float ray_len = 0;
     int proj_h = 0;
     int ray_num = 0;
+    int tile;
 
     float cos_a;
     float sin_a;
@@ -46,13 +47,14 @@ void    raycast(t_all *game, t_player *player)
     t_vector endpoint;
     t_ray_info ray_info;
 
+    tile = game->map_info->tile;
     ray_len = 0;
     endpoint.x = 0;
     endpoint.y = 0;
     
-    init_ray_struct(&ray_info);
+    init_ray_struct(&ray_info, game);
     cur_angle = player->angle - ray_info.FOV_half;
-    while(ray_num < 600)
+    while(ray_num < game->map_info->resolution.x)
     {
         cos_a = cosf(cur_angle);
         sin_a = sinf(cur_angle);
@@ -60,26 +62,31 @@ void    raycast(t_all *game, t_player *player)
             endpoint.x = player->pos.x + ray_len * cos_a;
             endpoint.y = player->pos.y + ray_len * sin_a;
             //printf("Endpoints x: %d, y: %d\n", (int)(endpoint.x/20), (int)(endpoint.y/20));
-            if (endpoint.x /100 >= game->map_info->width || endpoint.y /120 >= game->map_info->height || game->map_info->full_map[(int)(endpoint.y/120)][(int)endpoint.x/100] == '1')
+            
+            //it looks when we divide endpoints by same value (but width and heigth could be diffrent, check this)
+            if (endpoint.x /tile >= game->map_info->width || endpoint.y /tile >= game->map_info->height || game->map_info->full_map[(int)(endpoint.y/tile)][(int)endpoint.x/tile] == '1')
             {
                 ray_len *= cosf(player->angle - cur_angle);
                 //ray
                 //draw_line3(game->mlx_info->mlx, game->mlx_info->win, player->pos, endpoint, game->surface);
                 proj_h = 0;
                 if (ray_len > 0)
-                    proj_h = (ray_info.dist * 300 )/ ray_len;
+                    proj_h = (ray_info.proj_coef)/ ray_len;
                 t.x = ray_num;
                 b.x = ray_num;
 
-                t.y = 300 - proj_h;
+                t.y = game->map_info->resolution.y / 2 - (proj_h / 2);
                 if (t.y < 0)
                     t.y = 0;
-                b.y = proj_h;
-                if (b.y > 600)
-                    b.y = 600;
+                b.y = game->map_info->resolution.y / 2 + (proj_h / 2);
+                if (b.y > game->map_info->resolution.y)
+                    b.y = game->map_info->resolution.y;
                 //printf("End point x: %f,   y: %f\n", endpoint.x, endpoint.y);
                 //printf("Project height %d\n", proj_h);
-                draw_line3(game->mlx_info->mlx, game->mlx_info->win, t, b, game->surface);
+
+                //my vector swap in draw line algo, does interesting thing
+                if (b.y > t.y)
+                    draw_line3(game->mlx_info->mlx, game->mlx_info->win, t, b, game->surface);
                 break;
             }
             ray_len++;
@@ -107,18 +114,20 @@ void    raycast2(t_all *game, t_player *player)
 
     float cos_a;
     float sin_a;
+    int tile;
     //int x = 0;
     //int y = 0;
     t_vector endpoint;
     t_ray_info ray_info;
 
+    tile = game->map_info->tile;
     ray_len = 20;
     endpoint.x = 20;
     endpoint.y = 20;
     
-    init_ray_struct(&ray_info);
+    init_ray_struct(&ray_info, game);
     cur_angle = player->angle - ray_info.FOV_half;
-    while(ray_num < 600)
+    while(ray_num < game->map_info->resolution.x)
     {
         cos_a = cosf(cur_angle);
         sin_a = sinf(cur_angle);
@@ -126,7 +135,7 @@ void    raycast2(t_all *game, t_player *player)
             endpoint.x = player->pos.x + ray_len * cos_a;
             endpoint.y = player->pos.y + ray_len * sin_a;
             //printf("Endpoints x: %d, y: %d\n", (int)(endpoint.x/20), (int)(endpoint.y/20));
-            if (endpoint.x /100 >= game->map_info->width || endpoint.y /120 >= game->map_info->height || game->map_info->full_map[(int)(endpoint.y/120)][(int)endpoint.x/100] == '1')
+            if (endpoint.x /tile >= game->map_info->width || endpoint.y /tile >= game->map_info->height || game->map_info->full_map[(int)(endpoint.y/tile)][(int)endpoint.x/tile] == '1')
             {
                 //ray
                 draw_line3(game->mlx_info->mlx, game->mlx_info->win, player->pos, endpoint, game->surface);
