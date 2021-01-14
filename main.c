@@ -43,6 +43,7 @@ int main(int argc, char **argv)
     t_all   game_params;
     t_player player;
     t_img surface;
+    t_img tex;
     t_map map_info;
     t_mlx mlx_info;
     t_vector v1;
@@ -65,7 +66,7 @@ int main(int argc, char **argv)
     //map_info.map = gen_map(3, 3); now wont work
     //print_map2(map_info.map);
 
-    draw_line3(mlx_info.mlx, mlx_info.win, v1, v2, &surface);
+    draw_line3(mlx_info.mlx, mlx_info.win, v1, v2, &surface, NULL);
     player.pos.x = 300; player.pos.y = 300;
     player.size.x = 10;
     player.size.y = 10;
@@ -83,8 +84,10 @@ int main(int argc, char **argv)
     game_params.mlx_info = &mlx_info;
     game_params.map_info = &map_info;
 
+    get_tex(mlx_info.mlx, mlx_info.win, "./textures/brick.xpm", &tex);
+    game_params.tex_info = &tex;
+    
     game_params.player->pos.x++;
-
     //mlx_key_hook(mlx_info.win, key_hook, NULL);
     mlx_hook(mlx_info.win, 2, 1L<<0, movement, &player); //2 is key pressed event,
     mlx_loop_hook(mlx_info.mlx, rend, &game_params);

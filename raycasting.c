@@ -9,7 +9,7 @@ void    init_ray_struct(t_ray_info *ray_info, t_all *game)
     ray_info->max_depth = game->map_info->resolution.x * 2;
     //ray_info->rays_amount = 600;
     ray_info->dist = game->map_info->resolution.x / (2 * tan(ray_info->FOV_half));
-    ray_info->proj_coef = 2 * ray_info->dist * 80;
+    ray_info->proj_coef = 1 * ray_info->dist * game->map_info->tile;
 }
 
 /*
@@ -38,6 +38,7 @@ void    raycast(t_all *game, t_player *player)
     int proj_h = 0;
     int ray_num = 0;
     int tile;
+    char *color;
 
     float cos_a;
     float sin_a;
@@ -84,24 +85,17 @@ void    raycast(t_all *game, t_player *player)
                 //printf("End point x: %f,   y: %f\n", endpoint.x, endpoint.y);
                 //printf("Project height %d\n", proj_h);
 
+                color = get_color_ftex(game->tex_info, (t.x / game->map_info->resolution.x) * 31, (t.y / (float)proj_h) * 31);
                 //my vector swap in draw line algo, does interesting thing
                 if (b.y > t.y)
-                    draw_line3(game->mlx_info->mlx, game->mlx_info->win, t, b, game->surface);
+                    draw_line3(game->mlx_info->mlx, game->mlx_info->win, t, b, game->surface, color);
                 break;
             }
             ray_len++;
         }
-        
-        /*
-        while(game->map_info->full_map[(int)(endpoint.y/20)][2] != '1' || ray_len == 0)
-        {
-            draw_line(game->mlx_info->mlx, game->mlx_info->win, player->pos, endpoint, game->surface);
-            ray_len++;
-        }*/
-        //draw_line(game->mlx_info->mlx, game->mlx_info->win, player->pos, endray_point(player, cur_angle), game->surface);
-        //printf("Current angle %f\n", cur_angle);
+
         cur_angle += ray_info.dt_a;
-        ray_num += 2;
+        ray_num += 1;
         ray_len = 0;
     }   
 }
@@ -138,7 +132,7 @@ void    raycast2(t_all *game, t_player *player)
             if (endpoint.x /tile >= game->map_info->width || endpoint.y /tile >= game->map_info->height || game->map_info->full_map[(int)(endpoint.y/tile)][(int)endpoint.x/tile] == '1')
             {
                 //ray
-                draw_line3(game->mlx_info->mlx, game->mlx_info->win, player->pos, endpoint, game->surface);
+                draw_line3(game->mlx_info->mlx, game->mlx_info->win, player->pos, endpoint, game->surface, NULL);
                 break;
             }
             ray_len += 1;

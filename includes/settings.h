@@ -68,6 +68,7 @@ typedef struct all
     t_player *player;
     t_img     *surface;
     t_map     *map_info;
+    t_img     *tex_info;
     char *    mini_ray;
 }           t_all;
 

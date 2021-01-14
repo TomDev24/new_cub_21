@@ -258,7 +258,7 @@ void draw_line2(void *mlx, void *win, t_vector vec1, t_vector vec2, t_img *img)
     mlx_put_image_to_window(mlx, win, img->img, 0, 0);
 }
 
-void draw_line3(void *mlx, void *win, t_vector vec1, t_vector vec2, t_img *img)
+void draw_line3(void *mlx, void *win, t_vector vec1, t_vector vec2, t_img *img, char *col)
 {
     float x;
     float y;
@@ -305,7 +305,12 @@ void draw_line3(void *mlx, void *win, t_vector vec1, t_vector vec2, t_img *img)
     while (step--)
     {
         addr = img->addr + (((int)round(vec1.y) * img->line_length + (int)round(vec1.x) * (img->bits_per_pixel / 8)));
-        *(unsigned int*)addr = color;
+        
+        if (col != NULL)
+            *(unsigned int*)addr = *(unsigned int*)col;
+        else
+            *(unsigned int*)addr = color;
+        
         
         vec1.y += y;
         vec1.x += x;
@@ -315,6 +320,6 @@ void draw_line3(void *mlx, void *win, t_vector vec1, t_vector vec2, t_img *img)
     //if (dy == 0)
         //slope = 0;
     
-
+    col++;
     mlx_put_image_to_window(mlx, win, img->img, 0, 0);
 }
