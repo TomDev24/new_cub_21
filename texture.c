@@ -34,6 +34,7 @@ void    get_tex(void *mlx, void *win, char *file, t_img *tex_info)
     int h = 32;
     int x = 0;
     int y = 0;
+
     char *addr;
     char *start_addr;
 

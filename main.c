@@ -28,7 +28,8 @@ int rend(t_all *game_params)
 
     //draw_map(game_params->mlx_info->mlx, game_params->mlx_info->win, game_params->map_info);
 
-    raycast(game_params, game_params->player);
+    //draw_grid(game_params);
+    dda(game_params, game_params->player);
     if (game_params->mini_ray)
         raycast2(game_params, game_params->player);
     //draw_rect(game_params->mlx_info->mlx, game_params->mlx_info->win, game_params->player->pos, add_vector(game_params->player->pos, game_params->player->size), game_params->surface);
@@ -67,10 +68,10 @@ int main(int argc, char **argv)
     //print_map2(map_info.map);
 
     draw_line3(mlx_info.mlx, mlx_info.win, v1, v2, &surface, NULL);
-    player.pos.x = 300; player.pos.y = 300;
+    player.pos.x = 201; player.pos.y = 241;
     player.size.x = 10;
     player.size.y = 10;
-    player.angle = 0;
+    player.angle = 3.141;
     player.speed = 3;
     //player
     draw_rect(mlx_info.mlx, mlx_info.win, player.pos, add_vector(player.pos, player.size), &surface);
@@ -87,7 +88,7 @@ int main(int argc, char **argv)
     get_tex(mlx_info.mlx, mlx_info.win, "./textures/brick.xpm", &tex);
     game_params.tex_info = &tex;
     
-    game_params.player->pos.x++;
+    
     //mlx_key_hook(mlx_info.win, key_hook, NULL);
     mlx_hook(mlx_info.win, 2, 1L<<0, movement, &player); //2 is key pressed event,
     mlx_loop_hook(mlx_info.mlx, rend, &game_params);
