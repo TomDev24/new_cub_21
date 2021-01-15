@@ -65,7 +65,7 @@ void draw_rect(void *mlx, void *win, t_vector vec1, t_vector vec2, t_img *img)
     color = mlx_get_color_value(mlx, 0xFF00EE);
     x = vec1.x;
     y = vec1.y;
-    while (x < vec2.x)
+    while (x <= vec2.x)
     {
         while (y < vec2.y)
         {

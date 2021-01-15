@@ -34,8 +34,8 @@ int count_spaces(char *line)
 void print_map_info(t_map *map)
 {
     // resolution
-    printf("X val of res %f\n", map->resolution.x);
-    printf("Y val of res %f\n", map->resolution.y);
+    printf("X val of res %d\n", map->resolution.x);
+    printf("Y val of res %d\n", map->resolution.y);
 
     //colors for floor and ceilling
     printf("Floor color %x \n", map->floor_c);
@@ -51,7 +51,7 @@ void print_map_info(t_map *map)
     printf("Map WIDTH: %d  HEIGHT %d\n", map->width, map->height);
 
     //map tile
-    printf("Map tile %d\n", map->tile);
+    //printf("Map tile %d\n", map->tile);
 }
 
 int		create_trgb(int t, int r, int g, int b)
@@ -151,7 +151,8 @@ int parse_map(char *file, t_map *map_info)
 
     //tile can be get from HEIGTH too, we need to decide 
     //YOU SHOULD TAKE HEIGTH OF COURSE
-    map_info->tile = map_info->resolution.y / map_info->height;
+    map_info->tile.x = map_info->resolution.x / map_info->width;
+    map_info->tile.y = map_info->resolution.y / map_info->height;
     print_map_info(map_info);
     //printf("First line %s\n", map_info->full_map[4]);
     return (0);

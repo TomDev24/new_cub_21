@@ -25,7 +25,7 @@ typedef struct map
     char**       full_map;
     int         width;
     int         height;
-    int         tile;
+    t_vector         tile;
 }              t_map;
 
 typedef struct player
@@ -40,9 +40,10 @@ typedef struct ray_info
 {
     float       dt_a;
     float       FOV;
+    int         ray_scale;
     float       FOV_half;
     float       max_depth;
-    //int         rays_amount;
+    int         rays_amount;
     float       dist;
     float       proj_coef;
 }           t_ray_info;

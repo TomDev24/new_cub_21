@@ -34,7 +34,6 @@ void draw_rect(void *mlx, void *win, t_vector vec1, t_vector vec2, t_img *img);
 void    raycast(t_all *game, t_player *player);
 void    raycast2(t_all *game, t_player *player);
 void    dda(t_all *game, t_player *player);
-void    dda2(t_all *game, t_player *player);
 void    draw_grid(t_all *game);
 
 #endif

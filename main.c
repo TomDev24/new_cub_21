@@ -23,12 +23,14 @@ int rend(t_all *game_params)
     */
 
     // cpu drops from 14 to 2, when i dont use fill black
+    //mlx_clear_window(game_params->mlx_info->mlx, game_params->mlx_info->win);
     fill_black(game_params->mlx_info->mlx, game_params->mlx_info->win, game_params->surface, game_params->map_info);
     
 
     //draw_map(game_params->mlx_info->mlx, game_params->mlx_info->win, game_params->map_info);
 
     //draw_grid(game_params);
+    //raycast(game_params, game_params->player);
     dda(game_params, game_params->player);
     if (game_params->mini_ray)
         raycast2(game_params, game_params->player);

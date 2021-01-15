@@ -3,8 +3,8 @@
 
 typedef struct vector
 {
-    float x;
-    float y;
+    int x;
+    int y;
 }              t_vector;
 
 t_vector add_vector(t_vector vec1, t_vector vec2);
