@@ -94,7 +94,7 @@ void    raycast(t_all *game, t_player *player)
                 //my vector swap in draw line algo, does interesting thing
                 if (b.y > t.y)
 
-                    draw_rect(game->mlx_info->mlx, game->mlx_info->win, t, b, game->surface);
+                    draw_rect(game->mlx_info->mlx, game->mlx_info->win, t, b, game->surface, NULL);
                     //draw_line3(game->mlx_info->mlx, game->mlx_info->win, t, b, game->surface, NULL);
                 break;
             }
@@ -128,7 +128,7 @@ void    raycast2(t_all *game, t_player *player)
     
     init_ray_struct(&ray_info, game);
     cur_angle = player->angle - ray_info.FOV_half;
-    while(ray_num < game->map_info->resolution.x)
+    while(ray_num < ray_info.rays_amount)
     {
         cos_a = cosf(cur_angle);
         sin_a = sinf(cur_angle);
@@ -166,7 +166,8 @@ static float round3(float num)
     val = (int)(num * 10000 + .5);
     return ((float)val/10000);
 }
- 
+
+
 // cool unit cicle
 //http://live.mephist.ru/show/unit-circle/
 void    dda(t_all *game, t_player *player)
@@ -175,16 +176,19 @@ void    dda(t_all *game, t_player *player)
     float ray_len = 0;
     int proj_h = 0;
     int ray_num = 0;
+    int offset = 0;
     char *color;
 
     float cos_a;
     float sin_a;
+
 
     float invert_cos;
     float invert_sin;
 
     int tile_x = game->map_info->tile.x;
     int tile_y = game->map_info->tile.y;
+
     int x_m = (player->pos.x / tile_x) * tile_x;
     int y_m = (player->pos.y / tile_y) * tile_y;
     int dx;
@@ -282,6 +286,131 @@ void    dda(t_all *game, t_player *player)
             //endpoint.x = buff.x;
             //endpoint.y = buff.y;
             buff.x++;
+            offset = endpoint.y % tile_y;
+            ray_len = dep_v;
+        }
+        else
+        {
+            offset = endpoint.x % tile_x;
+            ray_len = dep_h;
+        }
+        ray_len *= cosf(player->angle - cur_angle);
+        proj_h = 0;
+        if (ray_len < 0.05)
+            proj_h = game->map_info->resolution.y;
+        else
+            proj_h = (ray_info.proj_coef)/ ray_len;
+        t.x = ray_num * ray_info.ray_scale;
+        b.x = (ray_num * ray_info.ray_scale) + ray_info.ray_scale;
+
+        t.y = game->map_info->resolution.y / 2 - (proj_h / 2);
+        if (t.y < 0)
+            t.y = 0;
+        b.y = game->map_info->resolution.y / 2 + (proj_h / 2);
+        if (b.y > game->map_info->resolution.y)
+            b.y = game->map_info->resolution.y;
+
+        //color = aplly_tex(game, offset);
+        color++;
+        if (b.y > t.y)
+            //draw_line3(game->mlx_info->mlx, game->mlx_info->win, t, b, game->surface, color);
+            draw_tex_rect(game, t, b, game->surface, offset, proj_h);
+        //printf("SECOND endpoint x %f  and y %f\n", endpoint.x, endpoint.y);
+        /*
+        if (endpoint.x < 0)
+            endpoint.x = 0;
+        if (endpoint.y < 0)
+            endpoint.y = 0;
+        
+        if (endpoint.x >= game->map_info->resolution.x)
+            endpoint.x = (game->map_info->resolution.x) - 1;
+        if (endpoint.y >= (game->map_info->resolution.y))
+            endpoint.y = (game->map_info->resolution.y) - 1;
+        */
+        //printf("SECOND endpoint x %f  and y %f\n", endpoint.x, endpoint.y);
+        //draw_line3(game->mlx_info->mlx, game->mlx_info->win, player->pos, endpoint, game->surface, NULL);
+        
+        cur_angle += ray_info.dt_a;
+        ray_num += 1;
+    }   
+}
+
+/*
+void    dda2(t_all *game, t_player *player)
+{
+    float cur_angle;
+    float ray_len = 0;
+    int proj_h = 0;
+    int ray_num = 0;
+    char *color;
+
+    float cos_a;
+    float sin_a;
+
+    float invert_cos;
+    float invert_sin;
+
+    int tile_x = game->map_info->tile.x;
+    int tile_y = game->map_info->tile.y;
+    int x_m = (player->pos.x / tile_x) * tile_x;
+    int y_m = (player->pos.y / tile_y) * tile_y;
+    int dx;
+    int dy;
+    float dep_v;
+    float dep_h;
+
+    t_vector t;
+    t_vector b;
+    t_vector buff; //for fisrt endpoint.x and .y
+    t_vector endpoint;
+    t_ray_info ray_info;
+    
+    init_ray_struct(&ray_info, game);
+    cur_angle = player->angle - ray_info.FOV_half;
+    
+    //printf("tiles of x %d and y %d \n", tile_x, tile_y);
+    //printf("x_m %d y_m %d\n", x_m, y_m);
+    while(ray_num < ray_info.rays_amount)
+    {
+        cos_a = round3(cosf(cur_angle));
+        sin_a = round3(sinf(cur_angle));
+
+        invert_cos = (1 / cos_a); // becaouse of round, wall detect doesnt work sometime
+        invert_sin = (1 / sin_a);
+
+        //printf("Inv_Cos is %f and Inv_sin is %f\n", invert_cos, invert_sin);
+        //
+        if (sin_a == 0)
+            sin_a = 0.00001;
+        if (cos_a == 0)
+            cos_a = 0.00001;
+        //
+        if (cos_a >= 0)
+        {
+            endpoint.x = x_m + tile_x;
+            dx = 1;
+        } else
+        {
+            endpoint.x = x_m;
+            dx = -1;
+        }
+
+        if (sin_a >= 0)
+        {
+            endpoint.y = y_m + tile_y;
+            dy = 1;
+        } else
+        {
+            endpoint.y = y_m;
+            dy = -1;
+        }
+
+        
+        if (dep_v < dep_h)
+        {
+            //endpoint.x = buff.x;
+            //endpoint.y = buff.y;
+            buff.x++;
             ray_len = dep_v;
         }
         else
@@ -310,7 +439,7 @@ void    dda(t_all *game, t_player *player)
             //draw_line3(game->mlx_info->mlx, game->mlx_info->win, t, b, game->surface, color);
             draw_rect(game->mlx_info->mlx, game->mlx_info->win, t, b, game->surface);
         //printf("SECOND endpoint x %f  and y %f\n", endpoint.x, endpoint.y);
-        /*
+        //
         if (endpoint.x < 0)
             endpoint.x = 0;
         if (endpoint.y < 0)
@@ -320,7 +449,7 @@ void    dda(t_all *game, t_player *player)
             endpoint.x = (game->map_info->resolution.x) - 1;
         if (endpoint.y >= (game->map_info->resolution.y))
             endpoint.y = (game->map_info->resolution.y) - 1;
-        */
+        ///
         //printf("SECOND endpoint x %f  and y %f\n", endpoint.x, endpoint.y);
         //draw_line3(game->mlx_info->mlx, game->mlx_info->win, player->pos, endpoint, game->surface, NULL);
         
@@ -328,61 +457,4 @@ void    dda(t_all *game, t_player *player)
         ray_num += 1;
     }   
 }
-
-void    draw_grid(t_all *game)
-{
-    t_vector vec1;
-    t_vector vec2;
-    t_vector len;
-
-    t_vector tile;
-    tile.x = (game->map_info->resolution.x / game->map_info->width);
-    tile.y = (game->map_info->resolution.y / game->map_info->height);
-
-    vec1.y = 0;
-    vec2.y = 0;
-
-    vec1.x = 0;
-    vec2.x = 0;
-
-    for (int i = 0; i < game->map_info->width * tile.x; i += tile.x)
-    {
-        for (int j = 0; j < game->map_info->height * tile.y; j += tile.y)
-        {
-            if (game->map_info->full_map[(int)(j / (int)tile.y)][(int)(i/ (int)tile.x)] == '1')
-            {
-                len.x = i + tile.x;
-                len.y = j + tile.y;
-                vec1.x = i;
-                vec1.y = j;
-                draw_rect(game->mlx_info->mlx, game->mlx_info->win, vec1, len, game->surface);
-            }
-        }
-    }
-
-    vec1.y = 0;
-    vec2.y = 0;
-
-    vec1.x = 0;
-    vec2.x = game->map_info->resolution.x;
-    
-    for (int j = 0; j < game->map_info->height * tile.y; j += tile.y)
-    {
-        draw_line3(game->mlx_info->mlx, game->mlx_info->win, vec1, vec2, game->surface, NULL);
-        vec1.y +=tile.y;
-        vec2.y += tile.y;
-    }
-
-    vec1.y = 0;
-    vec2.y = game->map_info->resolution.y;
-
-    vec1.x = 0;
-    vec2.x = 0;
-    
-    for (int j = 0; j < game->map_info->width * tile.x; j += tile.x)
-    {
-        draw_line3(game->mlx_info->mlx, game->mlx_info->win, vec1, vec2, game->surface, NULL);
-        vec1.x +=tile.x;
-        vec2.x += tile.x;
-    }
-}
+*/

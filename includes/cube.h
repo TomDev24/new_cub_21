@@ -29,11 +29,13 @@ t_img create_surface(void *mlx, int width, int height);
 void draw_line(void *mlx, void *win, t_vector vec1, t_vector vec2, t_img *img);
 void draw_line2(void *mlx, void *win, t_vector vec1, t_vector vec2, t_img *img);
 void draw_line3(void *mlx, void *win, t_vector vec1, t_vector vec2, t_img *img, char *color);
-void draw_rect(void *mlx, void *win, t_vector vec1, t_vector vec2, t_img *img);
+void draw_rect(void *mlx, void *win, t_vector vec1, t_vector vec2, t_img *img, char *col);
+void draw_tex_rect(t_all *game, t_vector vec1, t_vector vec2, t_img *img, int offset, int proj_h);
 
 void    raycast(t_all *game, t_player *player);
 void    raycast2(t_all *game, t_player *player);
 void    dda(t_all *game, t_player *player);
+//void    dda2(t_all *game, t_player *player);
 void    draw_grid(t_all *game);
 
 #endif

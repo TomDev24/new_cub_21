@@ -76,7 +76,7 @@ int main(int argc, char **argv)
     player.angle = 3.141;
     player.speed = 3;
     //player
-    draw_rect(mlx_info.mlx, mlx_info.win, player.pos, add_vector(player.pos, player.size), &surface);
+    draw_rect(mlx_info.mlx, mlx_info.win, player.pos, add_vector(player.pos, player.size), &surface, NULL);
     //draw_map(mlx_info.mlx, mlx_info.win, &map_info);
 
     //it work when there is no mlx_loop_hook

@@ -55,7 +55,48 @@ t_img create_surface(void *mlx, int width, int height)
     return (img);
 }
 
-void draw_rect(void *mlx, void *win, t_vector vec1, t_vector vec2, t_img *img)
+char *aplly_tex(t_all *game, int offset, int y, int proj_h) // offset is x, and it will be incremented
+{
+    float tex_x_scale = 32 / game->map_info->tile.x; // 32 is texture witdth and heigth
+    //int tex_y_scale = 32 / game->map_info->tile.y; // texture always are rects
+    char *res;
+
+    //proj_h += y;
+    //ofsset is x
+    //offset * tex_x_scale
+
+    //printf("Proj heuigh %d  and y %d  and res is %d\n", proj_h, y, (int)((y / proj_h) * 31));
+    res = get_color_ftex(game->tex_info, offset * tex_x_scale, (int)((y / (proj_h * proj_h)) * 31));
+
+    return (res);
+}
+
+void draw_tex_rect(t_all *game, t_vector vec1, t_vector vec2, t_img *img, int offset, int proj_h)
+{
+    int x = 0;
+    int y = 0;
+    unsigned int color;
+    char *addr;
+    
+    color = mlx_get_color_value(game->mlx_info->mlx, 0xFF00EE);
+    color++;
+    x = vec1.x;
+    y = vec1.y;
+    while (x <= vec2.x)
+    {
+        while (y < vec2.y)
+        {
+            addr = img->addr + (y * img->line_length + x * (img->bits_per_pixel / 8));
+            *(unsigned int*)addr = *(unsigned int*)aplly_tex(game, offset, y, proj_h);
+            y++;
+        }
+        y = vec1.y;
+        x++;
+    }
+    mlx_put_image_to_window(game->mlx_info->mlx, game->mlx_info->win, img->img, 0, 0);
+}
+
+void draw_rect(void *mlx, void *win, t_vector vec1, t_vector vec2, t_img *img, char *col)
 {
     int x = 0;
     int y = 0;
@@ -70,7 +111,10 @@ void draw_rect(void *mlx, void *win, t_vector vec1, t_vector vec2, t_img *img)
         while (y < vec2.y)
         {
             addr = img->addr + (y * img->line_length + x * (img->bits_per_pixel / 8)); 
-            *(unsigned int*)addr = color;
+            if (col != NULL)
+                *(unsigned int*)addr = *(unsigned int*)col;
+            else
+                *(unsigned int*)addr = color;
             y++;
         }
         y = vec1.y;
@@ -290,10 +334,13 @@ void draw_line3(void *mlx, void *win, t_vector vec1, t_vector vec2, t_img *img, 
     //dx and dy could be zero
     dx = vec2.x - vec1.x;
     dy = vec2.y - vec1.y;
-    if (abs(dx) > abs(dy))
-        step = abs(dx);
+
+    //draw line is corrupted
+    //because i do not use abs func anymore
+    if (dx > dy)
+        step = dx;
     else
-        step = abs(dy);
+        step = dy;
     //slope = dy / dx; // casting to float
     x = dx / (float)step;
     y = dy / (float)step;
@@ -304,7 +351,7 @@ void draw_line3(void *mlx, void *win, t_vector vec1, t_vector vec2, t_img *img, 
     //printf("X is %f, y is %f\n", x, y);
     while (step--)
     {
-        addr = img->addr + (((int)round(vec1.y) * img->line_length + (int)round(vec1.x) * (img->bits_per_pixel / 8)));
+        addr = img->addr + (((int)(vec1.y) * img->line_length + (int)(vec1.x) * (img->bits_per_pixel / 8)));
         
         if (col != NULL)
             *(unsigned int*)addr = *(unsigned int*)col;
@@ -322,4 +369,62 @@ void draw_line3(void *mlx, void *win, t_vector vec1, t_vector vec2, t_img *img, 
     
     col++;
     mlx_put_image_to_window(mlx, win, img->img, 0, 0);
+}
+
+void    draw_grid(t_all *game)
+{
+    t_vector vec1;
+    t_vector vec2;
+    t_vector len;
+
+    t_vector tile;
+    tile.x = (game->map_info->resolution.x / game->map_info->width);
+    tile.y = (game->map_info->resolution.y / game->map_info->height);
+
+    vec1.y = 0;
+    vec2.y = 0;
+
+    vec1.x = 0;
+    vec2.x = 0;
+
+    for (int i = 0; i < game->map_info->width * tile.x; i += tile.x)
+    {
+        for (int j = 0; j < game->map_info->height * tile.y; j += tile.y)
+        {
+            if (game->map_info->full_map[(int)(j / (int)tile.y)][(int)(i/ (int)tile.x)] == '1')
+            {
+                len.x = i + tile.x;
+                len.y = j + tile.y;
+                vec1.x = i;
+                vec1.y = j;
+                draw_rect(game->mlx_info->mlx, game->mlx_info->win, vec1, len, game->surface, NULL);
+            }
+        }
+    }
+
+    vec1.y = 0;
+    vec2.y = 0;
+
+    vec1.x = 0;
+    vec2.x = game->map_info->resolution.x;
+    
+    for (int j = 0; j < game->map_info->height * tile.y; j += tile.y)
+    {
+        draw_line3(game->mlx_info->mlx, game->mlx_info->win, vec1, vec2, game->surface, NULL);
+        vec1.y +=tile.y;
+        vec2.y += tile.y;
+    }
+
+    vec1.y = 0;
+    vec2.y = game->map_info->resolution.y;
+
+    vec1.x = 0;
+    vec2.x = 0;
+    
+    for (int j = 0; j < game->map_info->width * tile.x; j += tile.x)
+    {
+        draw_line3(game->mlx_info->mlx, game->mlx_info->win, vec1, vec2, game->surface, NULL);
+        vec1.x +=tile.x;
+        vec2.x += tile.x;
+    }
 }
