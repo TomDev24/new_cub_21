@@ -36,20 +36,15 @@ void print_map_info(t_map *map)
     // resolution
     printf("X val of res %d\n", map->resolution.x);
     printf("Y val of res %d\n", map->resolution.y);
-
     //colors for floor and ceilling
     printf("Floor color %x \n", map->floor_c);
     printf("Ceilling color %x \n", map->ceilling_c);
-
     //sprite
     printf("Sprite location %s \n", map->sprite);
-
     //map in form of string
     printf("MAP:\n%s \n", map->map);
-
     //map width and height
     printf("Map WIDTH: %d  HEIGHT %d\n", map->width, map->height);
-
     //map tile
     //printf("Map tile %d\n", map->tile);
 }
@@ -149,8 +144,6 @@ int parse_map(char *file, t_map *map_info)
     }
     map_info->full_map = ft_split(map_info->map, '\n');
 
-    //tile can be get from HEIGTH too, we need to decide 
-    //YOU SHOULD TAKE HEIGTH OF COURSE
     map_info->tile.x = map_info->resolution.x / map_info->width;
     map_info->tile.y = map_info->resolution.y / map_info->height;
     print_map_info(map_info);

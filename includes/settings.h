@@ -68,8 +68,11 @@ typedef struct all
     t_mlx   *mlx_info;
     t_player *player;
     t_img     *surface;
+    t_img      *black_sc;
     t_map     *map_info;
     t_img     *tex_info;
+    t_ray_info *ray_info;
+    int       vert_texture; // put somewhere else
     char *    mini_ray;
 }           t_all;
 

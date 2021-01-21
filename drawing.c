@@ -55,18 +55,22 @@ t_img create_surface(void *mlx, int width, int height)
     return (img);
 }
 
-char *aplly_tex(t_all *game, int offset, int y, int proj_h) // offset is x, and it will be incremented
+char *aplly_tex(t_all *game, int offset, float y, int proj_h) // offset is x, and it will be incremented
 {
-    float tex_x_scale = 32 / game->map_info->tile.x; // 32 is texture witdth and heigth
+    float tex_x_scale = 32 / (float)game->map_info->tile.x; // 32 is texture witdth and heigth
     //int tex_y_scale = 32 / game->map_info->tile.y; // texture always are rects
     char *res;
+    int tex_y;
 
-    //proj_h += y;
-    //ofsset is x
-    //offset * tex_x_scale
-
-    //printf("Proj heuigh %d  and y %d  and res is %d\n", proj_h, y, (int)((y / proj_h) * 31));
-    res = get_color_ftex(game->tex_info, offset * tex_x_scale, (int)((y / (proj_h * proj_h)) * 31));
+    if (game->vert_texture == 1)
+           tex_x_scale = 32 / (float)game->map_info->tile.y;
+    
+    proj_h++;
+    tex_y = y * 32;
+    //printf("Offst is %d\n", offset);
+    //printf("Tex_x_scale is is %d\n", tex_x_scale);
+    //printf("x is %d\n", offset * tex_x_scale);
+    res = get_color_ftex(game->tex_info, offset * tex_x_scale, tex_y);
 
     return (res);
 }
@@ -75,25 +79,21 @@ void draw_tex_rect(t_all *game, t_vector vec1, t_vector vec2, t_img *img, int of
 {
     int x = 0;
     int y = 0;
-    unsigned int color;
     char *addr;
     
-    color = mlx_get_color_value(game->mlx_info->mlx, 0xFF00EE);
-    color++;
     x = vec1.x;
     y = vec1.y;
-    while (x <= vec2.x)
+    while (x < vec2.x)
     {
         while (y < vec2.y)
         {
             addr = img->addr + (y * img->line_length + x * (img->bits_per_pixel / 8));
-            *(unsigned int*)addr = *(unsigned int*)aplly_tex(game, offset, y, proj_h);
+            *(unsigned int*)addr = *(unsigned int*)aplly_tex(game, offset, ((y - vec1.y)/ (float)proj_h), proj_h);
             y++;
         }
         y = vec1.y;
         x++;
     }
-    mlx_put_image_to_window(game->mlx_info->mlx, game->mlx_info->win, img->img, 0, 0);
 }
 
 void draw_rect(void *mlx, void *win, t_vector vec1, t_vector vec2, t_img *img, char *col)
@@ -190,116 +190,6 @@ void draw_map(void *mlx, void *win, t_map *map)
         y++;
     }
     mlx_put_image_to_window(mlx, win, img, 0, 0);
-}
-
-void draw_line(void *mlx, void *win, t_vector vec1, t_vector vec2, t_img *img)
-{
-    t_vector dir;
-    char *addr;
-    unsigned int color;
-
-    int x = 0;
-    int y = 0;
-    
-    //t_vector line_segment;
-    //line_segment.x = vec1.x;
-    //line_segment.y = vec1.y;
-
-    dir = sub_vector(vec2, vec1);
-    normalize(&dir);
-    //printf("\ndir x:%f y:%f\n",dir.x, dir.y);
-
-    //we dedacating to much memory to draw the line,
-    //it could be not 600 600, but sides of rectangle of the line
-    //drawing algorithm is slow too
-    color = mlx_get_color_value(mlx, 0xABCDEF);
-    if (vec1.x < vec2.x)
-        x = vec1.x;
-    else
-    {
-        x = vec2.x;
-        y = vec2.y;
-        vec2.x = vec1.x;
-        vec2.y = vec1.y;
-        vec1.x = x;
-        vec1.y = y;
-    }
-    while (x <= vec2.x)
-    {
-        y = (int)floor(vec1.y + dir.y * (x - vec1.x)/dir.x);
-        //printf("Y %d\n",y);
-        if (y < 0)
-            y = -y;
-        if (y == 0)
-            y = 1;
-        //printf("Y %d\n",y);
-        addr = img->addr + (int)floor((y * img->line_length + x * (img->bits_per_pixel / 8)));
-        *(unsigned int*)addr = color;
-        x++;
-    }
-
-
-    mlx_put_image_to_window(mlx, win, img->img, 0, 0);
-}
-
-void draw_line2(void *mlx, void *win, t_vector vec1, t_vector vec2, t_img *img)
-{
-    //Bresenham’s Line Drawing Algorithm
-    //https://www.thecrazyprogrammer.com/2017/01/bresenhams-line-drawing-algorithm-c-c.html
-    // y = mx + c -- line function
-    //slope m is equals dy/dx
- //   |          |
- //   | d upper  .
- //   |    .     |
- //   ,          |
- //   | d lower  |
-
-    int dx, dy, p, x, y;
-    //t_vector dir;
-    char *addr;
-    unsigned int color;
-
-    //vec2.x = abs((int)vec2.x);
-    //vec2.y = abs((int)vec2.y);
-    color = mlx_get_color_value(mlx, 0xABCDEF);
-    if (vec1.x <= vec2.x)
-    {
-        x = vec1.x;
-        y = vec1.y;
-    }
-    else
-    {
-        x = vec2.x;
-        y = vec2.y;
-        vec2.x = vec1.x;
-        vec2.y = vec1.y;
-        vec1.x = x;
-        vec1.y = y;
-    }
-
-    dx = vec2.x - x;
-    dy = vec2.y - y;
-
-    p = 2 * (dy - dx);
-    while (x <= vec2.x)
-    {
-        if (p>= 0)
-        {
-            addr = img->addr + ((y * img->line_length + x * (img->bits_per_pixel / 8)));
-            *(unsigned int*)addr = color;
-            y++;
-            p = p + 2*dy - 2*dx;
-        }
-        else
-        {
-           addr = img->addr + ((y * img->line_length + x * (img->bits_per_pixel / 8)));
-           *(unsigned int*)addr = color;
-           p = p + 2*dy;
-        }
-        printf("Y is %d\n", y);
-        x++;
-    }
-    mlx_put_image_to_window(mlx, win, img->img, 0, 0);
 }
 
 void draw_line3(void *mlx, void *win, t_vector vec1, t_vector vec2, t_img *img, char *col)

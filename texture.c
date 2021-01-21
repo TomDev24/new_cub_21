@@ -22,8 +22,11 @@ char *get_color_ftex(t_img *tex_info, int x, int y)
     //printf("The x and y of texture %d %d \n", x, y);
     start_addr = mlx_get_data_addr(tex_info->img, &tex_info->bits_per_pixel, &tex_info->line_length, &tex_info->endian);
     if (x < w && y < h)
+    {
+        //if (x == 30)
+        //printf("X is %d and y is %d\n", x, y);
         addr = start_addr + (y * tex_info->line_length + x * (tex_info->bits_per_pixel / 8));
-
+    }
     return (addr);
 }
 
