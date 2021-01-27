@@ -34,13 +34,16 @@ typedef struct player
     t_vector size;
     int      speed;
     float      angle;
+    float      rot_speed;
 }               t_player;
 
 typedef struct ray_info
 {
     float       dt_a;
+    float       d_pi;
     float       FOV;
     int         ray_scale;
+    int         center_ray;
     float       FOV_half;
     float       max_depth;
     int         rays_amount;
@@ -55,6 +58,7 @@ typedef struct img
     int     bits_per_pixel;
     int     line_length;
     int     endian;
+    int     w_h;
 }              t_img;
 
 typedef struct mlx
@@ -62,6 +66,17 @@ typedef struct mlx
     void    *win;
     void    *mlx;
 }       t_mlx;
+
+typedef struct vert_line
+{
+    float ray_len;
+    t_vector t;
+    t_vector b;
+    int   proj_h;
+    int   offset;
+    char  vert_text;
+    char  is_sprite;
+}          t_vert_line;
 
 typedef struct all
 {
@@ -71,7 +86,11 @@ typedef struct all
     t_img      *black_sc;
     t_map     *map_info;
     t_img     *tex_info;
+    t_img     *sprite_info;
     t_ray_info *ray_info;
+    int       sprite_rays;
+    float     tile_diagonal;
+    t_vert_line   *first_sprite_ray;
     int       vert_texture; // put somewhere else
     char *    mini_ray;
 }           t_all;

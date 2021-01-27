@@ -55,18 +55,17 @@ t_img create_surface(void *mlx, int width, int height)
     return (img);
 }
 
-char *aplly_tex(t_all *game, int offset, float y, int proj_h) // offset is x, and it will be incremented
+char *aplly_tex(t_all *game, int offset, float y) // offset is x, and it will be incremented
 {
-    float tex_x_scale = 32 / (float)game->map_info->tile.x; // 32 is texture witdth and heigth
+    float tex_x_scale = game->tex_info->w_h / (float)game->map_info->tile.x; // 32 is texture witdth and heigth
     //int tex_y_scale = 32 / game->map_info->tile.y; // texture always are rects
     char *res;
     int tex_y;
 
     if (game->vert_texture == 1)
-           tex_x_scale = 32 / (float)game->map_info->tile.y;
+           tex_x_scale = game->tex_info->w_h / (float)game->map_info->tile.y;
     
-    proj_h++;
-    tex_y = y * 32;
+    tex_y = y * game->tex_info->w_h;
     //printf("Offst is %d\n", offset);
     //printf("Tex_x_scale is is %d\n", tex_x_scale);
     //printf("x is %d\n", offset * tex_x_scale);
@@ -75,12 +74,39 @@ char *aplly_tex(t_all *game, int offset, float y, int proj_h) // offset is x, an
     return (res);
 }
 
-void draw_tex_rect(t_all *game, t_vector vec1, t_vector vec2, t_img *img, int offset, int proj_h)
+char *aplly_sprite(t_all *game, int offset, float y) // offset is x, and it will be incremented
+{
+    float tex_x_scale = game->sprite_info->w_h / (float)game->map_info->tile.x; // 32 is texture witdth and heigth
+    //int tex_y_scale = 32 / game->map_info->tile.y; // texture always are rects
+    char *res;
+    int tex_y;
+
+    if (game->vert_texture == 1)
+           tex_x_scale = game->sprite_info->w_h / (float)game->map_info->tile.y;
+    
+    tex_y = y * game->sprite_info->w_h;
+    //printf("Offst is %d\n", offset);
+    //printf("Tex_x_scale is is %d\n", tex_x_scale);
+    //printf("x is %d\n", offset * tex_x_scale);
+    res = get_color_ftex(game->sprite_info, offset * tex_x_scale, tex_y);
+
+    return (res);
+}
+
+void draw_tex_rect(t_all *game, t_vector vec1, t_vector vec2, t_img *img, int offset, int proj_h, char is_sprite)
 {
     int x = 0;
     int y = 0;
     char *addr;
+    int color;
+
+    //float tex_x_scale = game->sprite_info->w_h / (float)game->map_info->tile.x;
     
+    if (game->first_sprite_ray != NULL)
+    {
+        vec1.y = game->first_sprite_ray->t.y;
+        vec2.y = game->first_sprite_ray->b.y;
+    }
     x = vec1.x;
     y = vec1.y;
     while (x < vec2.x)
@@ -88,11 +114,29 @@ void draw_tex_rect(t_all *game, t_vector vec1, t_vector vec2, t_img *img, int of
         while (y < vec2.y)
         {
             addr = img->addr + (y * img->line_length + x * (img->bits_per_pixel / 8));
-            *(unsigned int*)addr = *(unsigned int*)aplly_tex(game, offset, ((y - vec1.y)/ (float)proj_h), proj_h);
+            if (is_sprite == '2')
+            {
+                color = create_trgb(0,0,255,0);
+                color++;
+                /*
+                get_t(*(int*)aplly_sprite(game, offset, ((y - vec1.y)/ (float)proj_h)));
+                get_r(*(int*)aplly_sprite(game, offset, ((y - vec1.y)/ (float)proj_h)));
+                get_g(*(int*)aplly_sprite(game, offset, ((y - vec1.y)/ (float)proj_h)));
+                get_b(*(int*)aplly_sprite(game, offset, ((y - vec1.y)/ (float)proj_h)));
+                */
+                *(unsigned int*)addr = *(unsigned int*)aplly_sprite(game, offset, ((y - vec1.y)/ (float)game->first_sprite_ray->proj_h));
+            }
+            else
+                *(unsigned int*)addr = *(unsigned int*)aplly_tex(game, offset, ((y - vec1.y)/ (float)proj_h));
             y++;
         }
         y = vec1.y;
         x++;
+    }
+    if (is_sprite == '2')
+    {
+        //game->first_sprite_ray->offset += 0.1;
+        //game->first_sprite_ray->offset = game->first_sprite_ray->offset % 64;
     }
 }
 

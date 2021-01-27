@@ -49,10 +49,6 @@ void print_map_info(t_map *map)
     //printf("Map tile %d\n", map->tile);
 }
 
-int		create_trgb(int t, int r, int g, int b)
-{
-	return(t << 24 | r << 16 | g << 8 | b);
-}
 
 void init_map_struct(t_map *map)
 {
@@ -144,7 +140,7 @@ int parse_map(char *file, t_map *map_info)
     }
     map_info->full_map = ft_split(map_info->map, '\n');
 
-    map_info->tile.x = map_info->resolution.x / map_info->width;
+    map_info->tile.x = map_info->resolution.y / map_info->height; //map_info->resolution.x / map_info->width;
     map_info->tile.y = map_info->resolution.y / map_info->height;
     print_map_info(map_info);
     //printf("First line %s\n", map_info->full_map[4]);

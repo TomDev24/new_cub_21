@@ -31,10 +31,13 @@ int     movement(int keycode, t_player *player)
     }
     if (keycode == 65361) //left
     {
-        player->angle -= 0.03;
+        player->angle -= 0.04;
+        //player_rot speed didnt help
         //if (player->angle < 0) there were segfaults at angle = 0
     }
     if (keycode == 65363) // right
-        player->angle += 0.03;
+        player->angle += 0.04;
+    
+    player->angle = fmod(player->angle, D_PI); //remainder
     return (0);
 }

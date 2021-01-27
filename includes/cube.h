@@ -1,6 +1,8 @@
 #ifndef CUBE_H
 # define CUBE_H
 
+#define D_PI 3.14159265358979323846 * 2
+
 #include <stdio.h>
 #include <math.h>
 #include <mlx.h>
@@ -14,6 +16,12 @@
 #include "settings.h"
 
 void draw_map(void *mlx, void *win, t_map *map);
+
+int		create_trgb(int t, int r, int g, int b);
+int		get_t(int trgb);
+int		get_r(int trgb);
+int		get_g(int trgb);
+int		get_b(int trgb);
 
 int parse_map(char *file, t_map *map_info);
 void fill_black(void *mlx, void *win, t_img *img, t_map *map);
@@ -30,11 +38,11 @@ void draw_line(void *mlx, void *win, t_vector vec1, t_vector vec2, t_img *img);
 void draw_line2(void *mlx, void *win, t_vector vec1, t_vector vec2, t_img *img);
 void draw_line3(void *mlx, void *win, t_vector vec1, t_vector vec2, t_img *img, char *color);
 void draw_rect(void *mlx, void *win, t_vector vec1, t_vector vec2, t_img *img, char *col);
-void draw_tex_rect(t_all *game, t_vector vec1, t_vector vec2, t_img *img, int offset, int proj_h);
+void draw_tex_rect(t_all *game, t_vector vec1, t_vector vec2, t_img *img, int offset, int proj_h, char is_sprite);
 
 void    raycast(t_all *game, t_player *player);
 void    raycast2(t_all *game, t_player *player);
-void    dda(t_all *game, t_player *player);
+void    dda(t_all *game, t_player *player, t_vert_line *lines);
 //void    dda2(t_all *game, t_player *player);
 void    draw_grid(t_all *game);
 
