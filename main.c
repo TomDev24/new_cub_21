@@ -3,7 +3,7 @@
 void    init_ray_struct(t_ray_info *ray_info, t_all *game)
 {
     ray_info->FOV = 1;
-    ray_info->ray_scale = 1;
+    ray_info->ray_scale = 4;
     ray_info->d_pi = 3.14159265358979323846 * 2; // if M_PI doesn exists
     ray_info->rays_amount = game->map_info->resolution.x / ray_info->ray_scale;
     ray_info->FOV_half= ray_info->FOV/2;
@@ -41,27 +41,31 @@ void    print_lines(t_vert_line *lines, t_all *game)
 void     draw_lines(t_all *game, t_vert_line *lines)
 {
     int i;
+    t_vector sprite_pos;
 
+    sprite_pos.x = -1;
+    sprite_pos.y = -1;
     i = 0;
     game->first_sprite_ray = NULL;
     while (i < game->ray_info->rays_amount)
     {
+
+        //if (sprite_pos.x !=-1 && sprite_pos.y != -1)
+            //printf("sprite at x %d  y %d\n", sprite_pos.x, sprite_pos.y);
+
         //printf("i is probm %d\n", i);
         //printf("//Line: len is %f offsset is %d  proj heigth %d\n", lines[i].ray_len, lines[i].offset, lines[i].proj_h);
         game->vert_texture = lines[i].vert_text;
-        if (lines[i].is_sprite == '2' && game->first_sprite_ray == NULL)
+        //if (lines[i].is_sprite != '2')
+        draw_tex_rect(game, lines[i].t, lines[i].b, game->surface, lines[i].offset, lines[i].proj_h, '1');
+            //draw_sprite(game, lines, &i);
+        if (lines[i].sprite_pos.x != sprite_pos.x || lines[i].sprite_pos.y != sprite_pos.y)
         {
-            game->first_sprite_ray = &lines[i];
-            //game->first_sprite_ray->offset = 12;
-            //game->first_sprite_ray->proj_h = 200;
+            sprite_pos.x = lines->sprite_pos.x;
+            sprite_pos.y = lines->sprite_pos.y;
+        
+            draw_sprite2(game, &lines[i], lines);
         }
-        if (lines[i].is_sprite != '2' && game->first_sprite_ray != NULL)
-            game->first_sprite_ray = NULL;
-
-        draw_tex_rect(game, lines[i].t, lines[i].b, game->surface, lines[i].offset, lines[i].proj_h, lines[i].is_sprite); 
-
-        // should be line[i].offset
-        //but we got problems with the offset
         i++;
     }
 }
@@ -115,8 +119,10 @@ int rend(t_all *game_params)
     //print_lines(lines, game_params);
     draw_lines(game_params, lines);
     //we need to put image, after dda is done
-    mlx_put_image_to_window(game_params->mlx_info->mlx, game_params->mlx_info->win, game_params->surface->img, 0,0);
-    mlx_put_image_to_window(game_params->mlx_info->mlx, game_params->mlx_info->win, game_params->sprite_info->img, 0,0);
+    //mlx_put_image_to_window(game_params->mlx_info->mlx, game_params->mlx_info->win, game_params->surface->img, 0,0);
+    //mlx_put_image_to_window(game_params->mlx_info->mlx, game_params->mlx_info->win, game_params->sprite_info->img, 0,0);
+    //raycast2(game_params, game_params->player);
+    //draw_grid(game_params);
     if (lines != NULL)
         free(lines);
     return (1);

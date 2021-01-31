@@ -74,23 +74,164 @@ char *aplly_tex(t_all *game, int offset, float y) // offset is x, and it will be
     return (res);
 }
 
-char *aplly_sprite(t_all *game, int offset, float y) // offset is x, and it will be incremented
+char *aplly_sprite(t_all *game, float offset, float y) // offset is x, and it will be incremented
 {
-    float tex_x_scale = game->sprite_info->w_h / (float)game->map_info->tile.x; // 32 is texture witdth and heigth
+    //float tex_x_scale = game->sprite_info->w_h / (float)game->map_info->tile.x; // 32 is texture witdth and heigth
+    //float tex_x_scale = game->sprite_rays / (float)game->map_info->tile.x;
     //int tex_y_scale = 32 / game->map_info->tile.y; // texture always are rects
     char *res;
     int tex_y;
 
-    if (game->vert_texture == 1)
-           tex_x_scale = game->sprite_info->w_h / (float)game->map_info->tile.y;
+    //if (game->vert_texture == 1)
+           //tex_x_scale = game->sprite_info->w_h / (float)game->map_info->tile.y;
     
     tex_y = y * game->sprite_info->w_h;
     //printf("Offst is %d\n", offset);
     //printf("Tex_x_scale is is %d\n", tex_x_scale);
-    //printf("x is %d\n", offset * tex_x_scale);
-    res = get_color_ftex(game->sprite_info, offset * tex_x_scale, tex_y);
+    //printf("x is %f\n", offset * tex_x_scale);
+    res = get_color_ftex(game->sprite_info, offset, tex_y);
 
     return (res);
+}
+
+void     draw_sprite(t_all *game, t_vert_line *lines, int *i)
+{
+    int count_rays = 0;
+    float st_offset;
+    int buf_i = *i;
+    int j = 0;
+
+    //float tex_x_scale = game->sprite_info->w_h / (float)game->map_info->tile.x;
+    while (*i < game->ray_info->rays_amount && lines[*i].is_sprite == '2')
+    {
+        count_rays++;
+        *i += 1;
+    }
+    game->sprite_rays = count_rays;
+    printf("Sprite rays amount %d\n", count_rays);
+    *i = buf_i;
+    st_offset = game->first_sprite_ray->offset;
+    st_offset = 0;
+    while (j < count_rays)
+    {
+        printf("here st_off %f\n", st_offset);
+        draw_tex_rect(game, lines[*i + j].t, lines[*i + j].b, game->surface, st_offset, game->first_sprite_ray->proj_h, '2');
+
+        st_offset += game->map_info->tile.x / (float)count_rays;
+        //st_offset = st_offset % 34;
+        j++;
+        *i += 1;
+    }
+    /*
+    while (*i < game->ray_info->rays_amount && lines[*i].is_sprite == '2' && st_offset < game->map_info->tile.x)
+    {
+        //printf("here st_off %d\n", st_offset);
+        //st_offset = 10;
+        draw_tex_rect(game, lines[*i].t, lines[*i].b, game->surface, st_offset, game->first_sprite_ray->proj_h, '2');
+        *i += 1;
+        st_offset++;
+        st_offset *= count_rays / 32;
+    }*/
+
+    game->first_sprite_ray = NULL;
+}
+
+float to_degrees(float radians) {
+    return radians * (180.0 / M_PI);
+}
+void     draw_sprite2(t_all *game, t_vert_line *line, t_vert_line *lines)
+{
+    float dx;
+    float dy;
+    float theta;
+    float gamma;
+    float dis_to_sprite;
+    
+    int delta_rays;
+    int cur_ray;
+
+    //draw vars
+    int proj_height = 0;
+    int half_proj_heigth = 0;
+    t_vector t;
+    t_vector b;
+
+    dx = line->sprite_pos.x * game->map_info->tile.x - game->player->pos.x;
+    dy = line->sprite_pos.y * game->map_info->tile.y - game->player->pos.y;
+    dis_to_sprite = sqrt(dx * dx + dy * dy);
+
+    theta = atan2(dy, dx);
+    gamma = theta - game->player->angle;
+
+    if ( (dx > 0 && to_degrees(game->player->angle) >= 180 && to_degrees(game->player->angle) <= 360) ||
+            (dx < 0 && dy < 0) )
+            gamma += D_PI;
+    
+    delta_rays = gamma / game->ray_info->dt_a;
+    cur_ray = game->ray_info->center_ray + delta_rays;
+    dis_to_sprite *= cos(game->ray_info->FOV_half - cur_ray * game->ray_info->dt_a);
+    lines++;
+    if (cur_ray >= 0 && cur_ray <= game->ray_info->rays_amount -1 )//&& dis_to_sprite < lines[cur_ray].ray_len)
+    {
+        proj_height = (game->ray_info->proj_coef / dis_to_sprite) * 1; // last is scaler
+        half_proj_heigth = proj_height / 2;
+        // shift is later
+        
+        t.x = cur_ray * game->ray_info->ray_scale - half_proj_heigth;
+        t.y = (game->map_info->resolution.y / 2) - half_proj_heigth;
+        b.x = cur_ray * game->ray_info->ray_scale  + half_proj_heigth;
+        b.y = (game->map_info->resolution.y / 2) + half_proj_heigth;
+
+        t.y = game->map_info->resolution.y / 2 - (proj_height / 2);
+        if (t.y < 0)
+            t.y = 0;
+        b.y = game->map_info->resolution.y / 2 + (proj_height / 2);
+        if (b.y > game->map_info->resolution.y)
+            b.y = game->map_info->resolution.y;
+        //printf("calling?\n");
+        draw_sprite_rect(game, t, b, game->surface, 14, proj_height, '2');
+    }
+
+}
+
+void draw_sprite_rect(t_all *game, t_vector vec1, t_vector vec2, t_img *img, int offset, int proj_h, char is_sprite)
+{
+    int x = 0;
+    int y = 0;
+    char *addr;
+    char *color;
+
+    offset = 0;
+    //float tex_x_scale = game->sprite_info->w_h / (float)game->map_info->tile.x;
+    x = vec1.x;
+    y = vec1.y;
+    is_sprite++;
+    while (x < vec2.x && x < game->map_info->resolution.x)
+    {
+        if (x < 0)
+        {
+            x++;
+            offset++;
+            continue;
+        }
+        while (y < vec2.y)
+        {
+            if (y < 0)
+            {
+                y++;
+                continue;
+            }
+            addr = img->addr + (y * img->line_length + x * (img->bits_per_pixel / 8));
+            color = aplly_sprite(game, (float)offset * (64/(float)proj_h), ((y - vec1.y)/ (float)proj_h));
+            //printf("hex color %d \n", *(unsigned int*)color);
+            if (*(int*)color != -16777216)
+                *(unsigned int*)addr = *(unsigned int*)color;
+            y++;
+        }
+        y = vec1.y;
+        x++;
+        offset++;
+    }
 }
 
 void draw_tex_rect(t_all *game, t_vector vec1, t_vector vec2, t_img *img, int offset, int proj_h, char is_sprite)
@@ -98,46 +239,49 @@ void draw_tex_rect(t_all *game, t_vector vec1, t_vector vec2, t_img *img, int of
     int x = 0;
     int y = 0;
     char *addr;
-    int color;
+    unsigned int color;
 
     //float tex_x_scale = game->sprite_info->w_h / (float)game->map_info->tile.x;
     
+    /*
     if (game->first_sprite_ray != NULL)
     {
         vec1.y = game->first_sprite_ray->t.y;
         vec2.y = game->first_sprite_ray->b.y;
-    }
+    } */
     x = vec1.x;
     y = vec1.y;
+    is_sprite++;
     while (x < vec2.x)
     {
+        if (x < 0)
+        {
+            x++;
+            continue;
+        }
         while (y < vec2.y)
         {
-            addr = img->addr + (y * img->line_length + x * (img->bits_per_pixel / 8));
-            if (is_sprite == '2')
+            if (y < 0)
             {
-                color = create_trgb(0,0,255,0);
-                color++;
-                /*
-                get_t(*(int*)aplly_sprite(game, offset, ((y - vec1.y)/ (float)proj_h)));
-                get_r(*(int*)aplly_sprite(game, offset, ((y - vec1.y)/ (float)proj_h)));
-                get_g(*(int*)aplly_sprite(game, offset, ((y - vec1.y)/ (float)proj_h)));
-                get_b(*(int*)aplly_sprite(game, offset, ((y - vec1.y)/ (float)proj_h)));
-                */
-                *(unsigned int*)addr = *(unsigned int*)aplly_sprite(game, offset, ((y - vec1.y)/ (float)game->first_sprite_ray->proj_h));
+                y++;
+                continue;
             }
-            else
-                *(unsigned int*)addr = *(unsigned int*)aplly_tex(game, offset, ((y - vec1.y)/ (float)proj_h));
+            addr = img->addr + (y * img->line_length + x * (img->bits_per_pixel / 8));
+            color = *(unsigned int*)aplly_tex(game, offset, ((y - vec1.y)/ (float)proj_h));
+            if (color != 0)
+                *(unsigned int*)addr = color;
             y++;
         }
         y = vec1.y;
         x++;
     }
+    /*
     if (is_sprite == '2')
     {
-        //game->first_sprite_ray->offset += 0.1;
+        if (game->first_sprite_ray->offset < game->map_info->tile.x - 1)
+            game->first_sprite_ray->offset += 1;
         //game->first_sprite_ray->offset = game->first_sprite_ray->offset % 64;
-    }
+    }*/
 }
 
 void draw_rect(void *mlx, void *win, t_vector vec1, t_vector vec2, t_img *img, char *col)
@@ -312,8 +456,8 @@ void    draw_grid(t_all *game)
     t_vector len;
 
     t_vector tile;
-    tile.x = (game->map_info->resolution.x / game->map_info->width);
-    tile.y = (game->map_info->resolution.y / game->map_info->height);
+    tile.x = (int)(game->map_info->resolution.x / game->map_info->width);
+    tile.y = (int)(game->map_info->resolution.y / game->map_info->height);
 
     vec1.y = 0;
     vec2.y = 0;
@@ -325,7 +469,8 @@ void    draw_grid(t_all *game)
     {
         for (int j = 0; j < game->map_info->height * tile.y; j += tile.y)
         {
-            if (game->map_info->full_map[(int)(j / (int)tile.y)][(int)(i/ (int)tile.x)] == '1')
+            if (game->map_info->full_map[(int)(j / (int)tile.y)][(int)(i/ (int)tile.x)] == '1' ||
+            game->map_info->full_map[(int)(j / (int)tile.y)][(int)(i/ (int)tile.x)] == '2')
             {
                 len.x = i + tile.x;
                 len.y = j + tile.y;

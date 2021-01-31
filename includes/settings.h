@@ -72,6 +72,7 @@ typedef struct vert_line
     float ray_len;
     t_vector t;
     t_vector b;
+    t_vector sprite_pos;
     int   proj_h;
     int   offset;
     char  vert_text;
