@@ -139,7 +139,7 @@ void     draw_sprite(t_all *game, t_vert_line *lines, int *i)
 float to_degrees(float radians) {
     return radians * (180.0 / M_PI);
 }
-void     draw_sprite2(t_all *game, t_vert_line *line, t_vert_line *lines)
+void     draw_sprite2(t_all *game, t_vert_line *line)
 {
     float dx;
     float dy;
@@ -156,10 +156,10 @@ void     draw_sprite2(t_all *game, t_vert_line *line, t_vert_line *lines)
     t_vector t;
     t_vector b;
 
-    dx = line->sprite_pos.x * game->map_info->tile.x - game->player->pos.x;
-    dy = line->sprite_pos.y * game->map_info->tile.y - game->player->pos.y;
-    dis_to_sprite = sqrt(dx * dx + dy * dy);
-
+    dx = (line->sprite_pos.x + 0.5) * game->map_info->tile.x - game->player->pos.x;
+    dy = (line->sprite_pos.y + 0.5) * game->map_info->tile.y - game->player->pos.y;
+    dis_to_sprite = line->sprite_dis;
+    
     theta = atan2(dy, dx);
     gamma = theta - game->player->angle;
 
@@ -170,8 +170,13 @@ void     draw_sprite2(t_all *game, t_vert_line *line, t_vert_line *lines)
     delta_rays = gamma / game->ray_info->dt_a;
     cur_ray = game->ray_info->center_ray + delta_rays;
     dis_to_sprite *= cos(game->ray_info->FOV_half - cur_ray * game->ray_info->dt_a);
-    lines++;
-    if (cur_ray >= 0 && cur_ray <= game->ray_info->rays_amount -1 )//&& dis_to_sprite < lines[cur_ray].ray_len)
+    
+    if (line->sprite_dis < 0)
+        line->sprite_dis = dis_to_sprite;
+
+    if (line->sprite_dis < dis_to_sprite || dis_to_sprite > line->ray_len)
+        return;
+    if (cur_ray >= 0 && cur_ray <= game->ray_info->rays_amount -1 && dis_to_sprite <= dis_to_sprite)
     {
         proj_height = (game->ray_info->proj_coef / dis_to_sprite) * 1; // last is scaler
         half_proj_heigth = proj_height / 2;

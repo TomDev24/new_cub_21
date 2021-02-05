@@ -2,7 +2,7 @@
 
 void    init_ray_struct(t_ray_info *ray_info, t_all *game)
 {
-    ray_info->FOV = 1;
+    ray_info->FOV = 0.8;
     ray_info->ray_scale = 4;
     ray_info->d_pi = 3.14159265358979323846 * 2; // if M_PI doesn exists
     ray_info->rays_amount = game->map_info->resolution.x / ray_info->ray_scale;
@@ -38,14 +38,19 @@ void    print_lines(t_vert_line *lines, t_all *game)
     }
 }
 
-void     draw_lines(t_all *game, t_vert_line *lines)
+int     draw_lines(t_all *game, t_vert_line *lines, t_vert_line *sprites)
 {
     int i;
+    int j;
     t_vector sprite_pos;
+
+        float dx;
+    float dy;
 
     sprite_pos.x = -1;
     sprite_pos.y = -1;
     i = 0;
+    j = 0;
     game->first_sprite_ray = NULL;
     while (i < game->ray_info->rays_amount)
     {
@@ -57,18 +62,50 @@ void     draw_lines(t_all *game, t_vert_line *lines)
         //printf("//Line: len is %f offsset is %d  proj heigth %d\n", lines[i].ray_len, lines[i].offset, lines[i].proj_h);
         game->vert_texture = lines[i].vert_text;
         //if (lines[i].is_sprite != '2')
+        //if (lines[i].ray_len < lines[i].len_to_sprite)
         draw_tex_rect(game, lines[i].t, lines[i].b, game->surface, lines[i].offset, lines[i].proj_h, '1');
             //draw_sprite(game, lines, &i);
-        if (lines[i].sprite_pos.x != sprite_pos.x || lines[i].sprite_pos.y != sprite_pos.y)
+
+        
+        if ((lines[i].sprite_pos.x != sprite_pos.x || lines[i].sprite_pos.y != sprite_pos.y))
         {
             sprite_pos.x = lines->sprite_pos.x;
             sprite_pos.y = lines->sprite_pos.y;
-        
-            draw_sprite2(game, &lines[i], lines);
+
+            sprites[j] = lines[i];
+            dx = (sprites[j].sprite_pos.x + 0.5) * game->map_info->tile.x - game->player->pos.x;
+            dy = (sprites[j].sprite_pos.y + 0.5) * game->map_info->tile.y - game->player->pos.y;
+            sprites[j].sprite_dis = sqrt(dx * dx + dy * dy);
+            //draw_sprite2(game, &lines[i]);
+            //printf("NUm %f\n", sprites[j].ray_len);
+            j++;
+        }
+        i++;
+    }
+    return (j);
+}
+
+void     draw_sprites(t_all *game, t_vert_line *sprites)
+{
+    int i;
+    t_vector sprite_pos;
+
+    sprite_pos.x = -1;
+    sprite_pos.y = -1;
+
+    i = 0;
+    while (sprites[i].ray_len > -1)
+    {
+        if ((sprites[i].sprite_pos.x != sprite_pos.x || sprites[i].sprite_pos.y != sprite_pos.y))
+        {
+            sprite_pos.x = sprites->sprite_pos.x;
+            sprite_pos.y = sprites->sprite_pos.y;
+            draw_sprite2(game, &sprites[i]);
         }
         i++;
     }
 }
+
 
 void    swap(t_vert_line *a, t_vert_line *b)
 {
@@ -76,17 +113,27 @@ void    swap(t_vert_line *a, t_vert_line *b)
     *a = *b;
     *b = t;
 }
-char    compare(t_vert_line a, t_vert_line b)
+char    compare(t_vert_line a, t_vert_line b, int is_sprite)
 {
     // comparision determines asceding or desendet order
-    if (a.ray_len < b.ray_len)
-        return (1);
-    else
-        return (0);
+    if (is_sprite == 0)
+    {
+        if (a.ray_len < b.ray_len)
+            return (1);
+        else
+            return (0);
+    } else
+    {
+        if (a.sprite_dis < b.sprite_dis)
+            return (1);
+        else
+            return (0);
+    }
+    
 }
 
 //bubble sort, then probably better to implement better sort algo
-void    sort_lines(t_vert_line *lines, int n)
+void    sort_lines(t_vert_line *lines, int n, int is_sprite)
 {
     int i;
     int j;
@@ -97,7 +144,7 @@ void    sort_lines(t_vert_line *lines, int n)
     {
         while (j < n - i - 1)
         {
-            if (compare(lines[j], lines[j+1]))
+            if (compare(lines[j], lines[j+1], is_sprite))
                 swap(&lines[j], &lines[j+1]);
             j++;
         }
@@ -109,15 +156,20 @@ void    sort_lines(t_vert_line *lines, int n)
 int rend(t_all *game_params)
 {
     t_vert_line *lines;
+    t_vert_line sprites[1024];
+    int amount_sprite;
 
     lines = NULL;
     fill_black(game_params->mlx_info->mlx, game_params->mlx_info->win, game_params->surface, game_params->map_info);
     lines = alloc_arr_of_lines(game_params);
     dda(game_params, game_params->player, lines);
     
-    sort_lines(lines, game_params->ray_info->rays_amount);
+    sort_lines(lines, game_params->ray_info->rays_amount, 0);
     //print_lines(lines, game_params);
-    draw_lines(game_params, lines);
+    amount_sprite = draw_lines(game_params, lines, sprites);
+    //printf("NUm %f\n", sprites[105].ray_len);
+    sort_lines(sprites, amount_sprite, 1);
+    draw_sprites(game_params, sprites);
     //we need to put image, after dda is done
     //mlx_put_image_to_window(game_params->mlx_info->mlx, game_params->mlx_info->win, game_params->surface->img, 0,0);
     //mlx_put_image_to_window(game_params->mlx_info->mlx, game_params->mlx_info->win, game_params->sprite_info->img, 0,0);

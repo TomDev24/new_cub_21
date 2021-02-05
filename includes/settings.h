@@ -70,9 +70,11 @@ typedef struct mlx
 typedef struct vert_line
 {
     float ray_len;
+    float len_to_sprite;
     t_vector t;
     t_vector b;
     t_vector sprite_pos;
+    float sprite_dis;
     int   proj_h;
     int   offset;
     char  vert_text;

@@ -122,7 +122,8 @@ void    dda(t_all *game, t_player *player, t_vert_line *lines)
     sprite_pos.y = -1;
     cur_angle = player->angle - game->ray_info->FOV_half;
     game->sprite_rays = 0;
-    
+
+
     //printf("tiles of x %d and y %d \n", tile_x, tile_y);
     //printf("x_m %d y_m %d\n", x_m, y_m);
     while(ray_num < game->ray_info->rays_amount)
@@ -130,6 +131,7 @@ void    dda(t_all *game, t_player *player, t_vert_line *lines)
         is_sprite = '0';
         cos_a = round3(cosf(cur_angle));
         sin_a = round3(sinf(cur_angle));
+        lines[ray_num].len_to_sprite = 10000;
 
         invert_cos = (1 / cos_a); // becaouse of round, wall detect doesnt work sometime
         invert_sin = (1 / sin_a);
@@ -150,6 +152,11 @@ void    dda(t_all *game, t_player *player, t_vert_line *lines)
             endpoint.y = player->pos.y + (dep_v * sin_a);
             if (ray_hit_check(game, endpoint, dx, 0, tile_x, tile_y, &is_sprite, &sprite_pos))
                 break;
+            if (is_sprite == '2' && lines[ray_num].len_to_sprite == 10000)
+            {
+                lines[ray_num].len_to_sprite = dep_v;
+                is_sprite = '0';
+            }
             endpoint.x += dx * tile_x;
             //printf("wtf %d", dx * tile_x);
         }
@@ -174,6 +181,12 @@ void    dda(t_all *game, t_player *player, t_vert_line *lines)
             endpoint.x = player->pos.x + (dep_h * cos_a);
             if (ray_hit_check(game, endpoint, 0, dy, tile_x, tile_y, &is_sprite, &sprite_pos))
                 break;
+            if (is_sprite == '2')
+            {
+                if (dep_h < lines[ray_num].len_to_sprite )
+                    lines[ray_num].len_to_sprite = dep_h;
+                is_sprite = '0';
+            }
             endpoint.y += dy * tile_y;
         }
         
@@ -224,6 +237,7 @@ void    dda(t_all *game, t_player *player, t_vert_line *lines)
         lines[ray_num].proj_h = proj_h;
         lines[ray_num].vert_text = game->vert_texture;
         lines[ray_num].is_sprite = is_sprite;
+        lines[ray_num].sprite_dis = -1;
         lines[ray_num].sprite_pos = sprite_pos;
         
         /*

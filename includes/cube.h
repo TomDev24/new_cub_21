@@ -42,7 +42,7 @@ void draw_rect(void *mlx, void *win, t_vector vec1, t_vector vec2, t_img *img, c
 void draw_tex_rect(t_all *game, t_vector vec1, t_vector vec2, t_img *img, int offset, int proj_h, char is_sprite);
 void draw_sprite_rect(t_all *game, t_vector vec1, t_vector vec2, t_img *img, int offset, int proj_h, char is_sprite);
 void     draw_sprite(t_all *game, t_vert_line *lines, int *i);
-void     draw_sprite2(t_all *game, t_vert_line *line, t_vert_line *lines);
+void     draw_sprite2(t_all *game, t_vert_line *line);
 
 void    raycast(t_all *game, t_player *player);
 void    raycast2(t_all *game, t_player *player);
